@@ -1,0 +1,83 @@
+# 📋 Node modules
+node_modules/
+.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# 🐍 Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# 🗄️ Base de données
+*.db
+*.sqlite3
+*.sql
+
+# 🔐 Variables d'environnement
+.env
+.env.local
+.env.*.local
+*.env
+
+# 📝 Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# 💾 OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# 🏗️ Build
+build/
+dist/
+.next/
+out/
+target/
+
+# 📦 Uploads
+uploads/
+*.pdf
+*.docx
+*.xlsx
+
+# 🔧 IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.swn
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+
+# 🧪 Tests
+coverage/
+.nyc_output/
+.pytest_cache/
+htmlcov/
+
+# 📱 Tauri
+frontend/src-tauri/target/
+frontend/src-tauri/WixTools/
+
+# ⚙️ Autres
+.vercel
+.turbo

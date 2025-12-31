@@ -1,0 +1,34 @@
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-dotenv==1.0.1
+pydantic==2.10.3
+pydantic-settings==2.6.1
+sqlalchemy==2.0.36
+asyncpg==0.30.0
+alembic==1.14.0
+python-multipart==0.0.19
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+httpx==0.28.1
+
+# IA et traitement de documents
+openai==1.58.1
+langchain==0.3.13
+langchain-openai==0.2.14
+pypdf2==3.0.1
+python-docx==1.1.2
+openpyxl==3.1.5
+xlsxwriter==3.2.0
+
+# Base vectorielle
+chromadb==0.5.23
+sentence-transformers==3.3.1
+
+# Calculs financiers
+numpy==2.2.0
+pandas==2.2.3
+# scipy==1.14.1  # Installation manuelle si besoin
+
+# Utilitaires
+python-magic==0.4.27
+pillow==11.0.0
