@@ -15,14 +15,7 @@ interface Project {
   updatedAt: string;
 }
 
-const mockProjects: Project[] = [
-  { id: 1, name: 'Immeuble Haussmannien', address: '45 Avenue Foch, Paris 16', type: 'rental', status: 'in_progress', tri: 8.5, investment: 450000, updatedAt: '2025-12-30' },
-  { id: 2, name: 'Résidence Les Jardins', address: '12 Rue de la Paix, Lyon', type: 'resale', status: 'completed', tri: 12.3, investment: 180000, updatedAt: '2025-12-28' },
-  { id: 3, name: 'Villa Moderne', address: '78 Boulevard Gambetta, Bordeaux', type: 'mixed', status: 'draft', tri: 7.2, investment: 620000, updatedAt: '2025-12-25' },
-  { id: 4, name: 'Appartement T4', address: '25 Cours Lafayette, Lyon', type: 'rental', status: 'in_progress', tri: 9.1, investment: 290000, updatedAt: '2025-12-26' },
-  { id: 5, name: 'Loft Industriel', address: '8 Rue des Usines, Lille', type: 'resale', status: 'completed', tri: 11.5, investment: 350000, updatedAt: '2025-12-24' },
-  { id: 6, name: 'Immeuble Bourgeois', address: '33 Avenue Victor Hugo, Nice', type: 'mixed', status: 'in_progress', tri: 8.8, investment: 580000, updatedAt: '2025-12-29' },
-];
+const mockProjects: Project[] = [];
 
 export default function ProjectsPage() {
   const [filter, setFilter] = useState<string>('all');
