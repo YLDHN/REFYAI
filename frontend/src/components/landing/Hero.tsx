@@ -30,13 +30,13 @@ export const Hero = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <a href="/projects/new" className="glass-button px-8 py-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2 group">
+              <a href="/auth/register" className="glass-button px-8 py-4 rounded-xl text-white font-semibold flex items-center justify-center gap-2 group">
                 Commencer un projet
                 <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </a>
-              <a href="/demo" className="px-8 py-4 rounded-xl text-gray-300 hover:text-white font-semibold flex items-center justify-center hover:bg-white/5 transition-colors">
+              <a href="/auth/login" className="px-8 py-4 rounded-xl text-gray-300 hover:text-white font-semibold flex items-center justify-center hover:bg-white/5 transition-colors">
                 Voir la démo
               </a>
             </div>
