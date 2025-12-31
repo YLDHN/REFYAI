@@ -4,9 +4,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@refyai-api-url"
-  },
   "rewrites": [
     {
       "source": "/api/:path*",
