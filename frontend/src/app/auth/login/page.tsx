@@ -3,9 +3,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/lib/hooks';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,24 +19,10 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Erreur de connexion');
-      }
-
-      const data = await response.json();
-      localStorage.setItem('token', data.access_token);
+      await login(email, password);
       router.push('/dashboard');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.detail || err.message || 'Erreur de connexion');
     } finally {
       setLoading(false);
     }

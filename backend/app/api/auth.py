@@ -3,6 +3,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
 from app.core.database import get_db
+from app.core.deps import get_current_active_user
 from app.models import User
 from app.core.security import get_password_hash, verify_password, create_access_token
 from pydantic import BaseModel, EmailStr
@@ -94,13 +95,9 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
     return {"access_token": access_token, "token_type": "bearer"}
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user(db: AsyncSession = Depends(get_db)):
+async def get_current_user(
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
+):
     """Récupérer les informations de l'utilisateur connecté"""
-    # TODO: Implémenter la récupération du user depuis le token JWT
-    # Pour l'instant, retourne un utilisateur mock
-    return UserResponse(
-        id=1,
-        email="admin@refyai.com",
-        full_name="Admin REFY AI",
-        is_active=True
-    )
+    return current_user

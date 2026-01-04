@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { apiClient } from '@/lib/api';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -18,27 +19,16 @@ export default function RegisterPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          email, 
-          password,
-          full_name: fullName || null
-        }),
+      await apiClient.post('/auth/register', { 
+        email, 
+        password,
+        full_name: fullName || null
       });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.detail || 'Erreur lors de l&apos;inscription');
-      }
 
       // Rediriger vers la page de connexion
       router.push('/auth/login?registered=true');
     } catch (err: any) {
-      setError(err.message);
+      setError(err.response?.data?.detail || err.message || 'Erreur lors de l\'inscription');
     } finally {
       setLoading(false);
     }

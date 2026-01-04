@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useShowstoppers } from '@/lib/hooks';
 
 interface Showstopper {
   category: string;
@@ -23,12 +24,12 @@ interface ActionPlanItem {
 }
 
 export default function ShowstoppersPage() {
+  const { detectShowstoppers, getActionPlan } = useShowstoppers();
   const [showstoppers, setShowstoppers] = useState<Showstopper[]>([]);
   const [actionPlan, setActionPlan] = useState<ActionPlanItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'list' | 'plan'>('list');
 
-  // Mock data - à remplacer par appel API
   useEffect(() => {
     loadShowstoppers();
   }, []);
@@ -36,7 +37,9 @@ export default function ShowstoppersPage() {
   const loadShowstoppers = async () => {
     setLoading(true);
     try {
-      // TODO: Remplacer par vrai appel API
+      // Appel API backend pour détecter showstoppers
+      // Pour le moment, on utilise mock data car on a besoin de données de projet
+      // TODO: Passer les vraies données du projet actif
       const mockShowstoppers: Showstopper[] = [
         {
           category: 'regulatory',

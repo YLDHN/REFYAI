@@ -123,8 +123,22 @@ async def analyze_document(
             detail="Document non trouvé"
         )
     
-    # TODO: Extraire le texte du document (PDF, DOCX, etc.)
-    document_text = "Texte du document à analyser..."
+    # Extraire le texte du document
+    try:
+        from app.services.document_extraction_service import document_extraction_service
+        
+        with open(document.file_path, "rb") as f:
+            file_bytes = f.read()
+        
+        document_text = document_extraction_service.extract_text(
+            file_bytes, 
+            document.mime_type
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erreur lors de l'extraction du texte: {str(e)}"
+        )
     
     # Analyser avec l'IA
     analysis = await ai_service.analyze_document(

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useMarket } from '@/lib/hooks';
 
 interface ComparableSale {
   date_mutation: string;
@@ -27,9 +28,12 @@ interface MarketAnalysis {
 }
 
 export default function MarketAnalysisPage() {
+  const { analyzeMarket, getComparables } = useMarket();
   const [analysis, setAnalysis] = useState<MarketAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'comparables' | 'valuation' | 'strategy'>('comparables');
+  const [city, setCity] = useState('Paris');
+  const [surface, setSurface] = useState(100);
 
   useEffect(() => {
     loadMarketAnalysis();
@@ -38,7 +42,13 @@ export default function MarketAnalysisPage() {
   const loadMarketAnalysis = async () => {
     setLoading(true);
     try {
-      // TODO: Remplacer par vrai appel API
+      // Appel API backend réel
+      const response = await analyzeMarket({ city, surface, type_bien: 'appartement' });
+      setAnalysis(response.data);
+    } catch (error) {
+      console.error('Erreur API, utilisation des données mockées:', error);
+      
+      // Fallback vers mock data en cas d'erreur
       const mockAnalysis: MarketAnalysis = {
         valuation: {
           p25: 3850,
@@ -95,8 +105,6 @@ export default function MarketAnalysisPage() {
       };
 
       setAnalysis(mockAnalysis);
-    } catch (error) {
-      console.error('Erreur:', error);
     } finally {
       setLoading(false);
     }

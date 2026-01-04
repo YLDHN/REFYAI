@@ -36,3 +36,5 @@ next-env.d.ts
 
 # Tauri
 src-tauri/target
+
+/src/generated/prisma

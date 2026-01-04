@@ -5,6 +5,9 @@ API officielle data.gouv.fr pour les prix du marché immobilier
 from typing import Dict, Any, List, Optional
 import httpx
 from datetime import datetime, timedelta
+import logging
+
+logger = logging.getLogger(__name__)
 
 class DVFService:
     """Service d'accès aux données DVF (transactions immobilières)"""
@@ -69,13 +72,13 @@ class DVFService:
                 return data.get("resultats", [])
                 
         except httpx.HTTPStatusError as e:
-            print(f"Erreur HTTP DVF API ({e.response.status_code}): {e}")
+            logger.error(f"Erreur HTTP DVF API ({e.response.status_code}): {e}")
             return []
         except httpx.RequestError as e:
-            print(f"Erreur réseau DVF API: {e}")
+            logger.error(f"Erreur réseau DVF API: {e}")
             return []
         except Exception as e:
-            print(f"Erreur inattendue DVF API: {e}")
+            logger.error(f"Erreur inattendue DVF API: {e}")
             return []
     
     async def calculate_market_value(

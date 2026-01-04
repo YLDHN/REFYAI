@@ -5,6 +5,9 @@ Basé sur Euribor + marge selon profil de risque
 from typing import Dict, Any
 from datetime import datetime
 import httpx
+import logging
+
+logger = logging.getLogger(__name__)
 
 class InterestRateService:
     """Service de calcul algorithmique des taux d'intérêt"""
@@ -60,7 +63,7 @@ class InterestRateService:
                         pass
                         
         except Exception as e:
-            print(f"Erreur récupération Euribor depuis ECB: {e}")
+            logger.error(f"Erreur récupération Euribor depuis ECB: {e}")
         
         # Fallback sur valeur par défaut
         return self.DEFAULT_EURIBOR_12M if maturity == "12m" else self.DEFAULT_EURIBOR_3M

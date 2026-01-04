@@ -40,17 +40,18 @@ async def chat_with_ai(request: ChatRequest):
             detail=f"Erreur lors de la génération de la réponse: {str(e)}"
         )
 
-@router.post("/analyze-document")
-async def analyze_text(
-    text: str,
+class DocumentAnalysisRequest(BaseModel):
+    text: str
     document_type: str = "default"
-):
+
+@router.post("/analyze-document")
+async def analyze_text(request: DocumentAnalysisRequest):
     """Analyser un texte avec l'IA"""
     
     try:
         analysis = await ai_service.analyze_document(
-            text=text,
-            document_type=document_type
+            text=request.text,
+            document_type=request.document_type
         )
         
         return analysis

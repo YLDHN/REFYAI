@@ -1,0 +1,72 @@
+// Prisma Schema for REFYAI
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              Int       @id @default(autoincrement())
+  email           String    @unique
+  hashed_password String
+  full_name       String?
+  is_active       Boolean   @default(true)
+  is_superuser    Boolean   @default(false)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime?  @updatedAt
+
+  projects        Project[]
+
+  @@map("users")
+}
+
+model Project {
+  id                   Int       @id @default(autoincrement())
+  user_id              Int
+  name                 String
+  description          String?
+  address              String?
+  city                 String?
+  postal_code          String?
+  project_type         String?
+  status               String    @default("draft")
+  purchase_price       Float?
+  renovation_budget    Float?
+  estimated_value      Float?
+  regulatory_analysis  Json?
+  technical_analysis   Json?
+  financial_analysis   Json?
+  technical_score      Float?
+  risk_score           Float?
+  created_at           DateTime  @default(now())
+  updated_at           DateTime?  @updatedAt
+
+  user                 User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  documents            Document[]
+
+  @@map("projects")
+  @@index([user_id])
+}
+
+model Document {
+  id                Int       @id @default(autoincrement())
+  project_id        Int
+  filename          String
+  original_filename String?
+  file_path         String
+  file_size         Int?
+  mime_type         String?
+  document_type     String?
+  is_analyzed       Int       @default(0)
+  analysis_result   String?
+  uploaded_at       DateTime  @default(now())
+
+  project           Project   @relation(fields: [project_id], references: [id], onDelete: Cascade)
+
+  @@map("documents")
+  @@index([project_id])
+}

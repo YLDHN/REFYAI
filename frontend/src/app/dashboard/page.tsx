@@ -1,18 +1,39 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
+import { useProjects } from '@/lib/hooks';
 
 export default function DashboardPage() {
-  const stats = [
+  const { projects, loading, fetchProjects } = useProjects();
+  const [stats, setStats] = useState([
     { label: 'Projets Actifs', value: '0', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', color: 'blue', trend: '-' },
     { label: 'TRI Moyen', value: '0%', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: 'green', trend: '-' },
     { label: 'Investissement', value: '0€', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: 'purple', trend: '-' },
     { label: 'Documents', value: '0', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', color: 'orange', trend: '-' },
-  ];
+  ]);
 
-  const recentProjects: any[] = [];
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  useEffect(() => {
+    if (projects.length > 0) {
+      const activeProjects = projects.filter((p: any) => p.status === 'in_progress' || p.status === 'draft');
+      const totalInvestment = projects.reduce((sum: number, p: any) => sum + (p.purchase_price || 0) + (p.renovation_budget || 0), 0);
+      const avgTRI = projects.filter((p: any) => p.financial_analysis?.tri).reduce((sum: number, p: any) => sum + (p.financial_analysis.tri || 0), 0) / projects.length || 0;
+      
+      setStats([
+        { ...stats[0], value: activeProjects.length.toString() },
+        { ...stats[1], value: `${avgTRI.toFixed(1)}%` },
+        { ...stats[2], value: `${(totalInvestment / 1000000).toFixed(1)}M€` },
+        { ...stats[3], value: '0' }, // À calculer avec les documents
+      ]);
+    }
+  }, [projects]);
+
+  const recentProjects = (projects as any[]).slice(0, 5);
 
   return (
     <DashboardLayout>

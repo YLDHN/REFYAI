@@ -3,7 +3,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, update, delete
 from typing import List
 from app.core.database import get_db
-from app.models import Project, ProjectStatus, ProjectType
+from app.core.deps import get_current_active_user
+from app.models import Project, ProjectStatus, ProjectType, User
 from pydantic import BaseModel
 from datetime import datetime
 
@@ -16,10 +17,43 @@ class ProjectCreate(BaseModel):
     address: str | None = None
     city: str | None = None
     postal_code: str | None = None
-    project_type: ProjectType
+    project_type: str  # rental, resale, mixed
+    
+    # Nouveaux champs
+    strategy: str | None = None  # core, core_plus, value_add
+    bp_duration: int | None = None
+    asset_type: str | None = None  # residential, office, logistics, retail, mixed
+    surface: float | None = None
+    
+    # Financier de base
     purchase_price: float | None = None
     renovation_budget: float | None = None
     estimated_value: float | None = None
+    
+    # Données locatives
+    lease_start_date: str | None = None
+    walb: float | None = None
+    walt: float | None = None
+    current_rent: float | None = None
+    market_rent: float | None = None
+    occupancy_rate: float | None = None
+    lease_state: dict | None = None
+    
+    # Acquisition
+    acquisition_price: float | None = None
+    notary_fees: float | None = None
+    due_diligence_cost: float | None = None
+    acquisition_yield: float | None = None
+    
+    # CAPEX et renouvellement
+    rent_renewal_assumptions: dict | None = None
+    capex_details: dict | None = None
+    
+    # Financement
+    financing_amount: float | None = None
+    ltv: float | None = None
+    interest_rate: float | None = None
+    loan_duration: int | None = None
 
 class ProjectUpdate(BaseModel):
     name: str | None = None
@@ -27,8 +61,8 @@ class ProjectUpdate(BaseModel):
     address: str | None = None
     city: str | None = None
     postal_code: str | None = None
-    project_type: ProjectType | None = None
-    status: ProjectStatus | None = None
+    project_type: str | None = None
+    status: str | None = None
     purchase_price: float | None = None
     renovation_budget: float | None = None
     estimated_value: float | None = None
@@ -41,11 +75,33 @@ class ProjectResponse(BaseModel):
     address: str | None
     city: str | None
     postal_code: str | None
-    project_type: ProjectType | None
-    status: ProjectStatus
+    project_type: str | None
+    status: str
+    
+    # Nouveaux champs
+    strategy: str | None = None
+    bp_duration: int | None = None
+    asset_type: str | None = None
+    surface: float | None = None
+    
+    # Financier
     purchase_price: float | None
     renovation_budget: float | None
     estimated_value: float | None
+    
+    # Locatif
+    current_rent: float | None = None
+    market_rent: float | None = None
+    occupancy_rate: float | None = None
+    walb: float | None = None
+    walt: float | None = None
+    acquisition_yield: float | None = None
+    
+    # Financement
+    ltv: float | None = None
+    interest_rate: float | None = None
+    
+    # Scores
     technical_score: float | None
     risk_score: float | None
     created_at: datetime
@@ -57,16 +113,23 @@ class ProjectResponse(BaseModel):
 @router.post("/", response_model=ProjectResponse, status_code=status.HTTP_201_CREATED)
 async def create_project(
     project_data: ProjectCreate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Créer un nouveau projet"""
     
-    # TODO: Récupérer l'ID de l'utilisateur connecté depuis le token
-    user_id = 1
+    # Convertir les données en dict
+    data = project_data.model_dump()
+    
+    # Forcer la conversion des valeurs en minuscules pour les enums
+    if 'project_type' in data and data['project_type']:
+        data['project_type'] = data['project_type'].lower()
+    if 'status' in data and data['status']:
+        data['status'] = data['status'].lower()
     
     project = Project(
-        user_id=user_id,
-        **project_data.model_dump()
+        user_id=current_user.id,
+        **data
     )
     
     db.add(project)
@@ -80,12 +143,12 @@ async def list_projects(
     skip: int = 0,
     limit: int = 100,
     status: ProjectStatus | None = None,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Lister tous les projets"""
     
-    # TODO: Filtrer par user_id
-    query = select(Project)
+    query = select(Project).where(Project.user_id == current_user.id)
     
     if status:
         query = query.where(Project.status == status)

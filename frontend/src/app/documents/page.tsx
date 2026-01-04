@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { documentsAPI } from '@/lib/api';
 
 interface Document {
   id: number;
@@ -13,11 +14,75 @@ interface Document {
 }
 
 export default function DocumentsPage() {
-  const [documents] = useState<Document[]>([
-    { id: 1, name: 'PLU_Paris_16.pdf', type: 'PLU', size: '2.4 MB', uploadedAt: '2025-12-30', status: 'processed' },
-    { id: 2, name: 'DPE_Rapport.pdf', type: 'Diagnostic', size: '856 KB', uploadedAt: '2025-12-28', status: 'processed' },
-    { id: 3, name: 'Plan_Cadastral.pdf', type: 'Cadastre', size: '1.2 MB', uploadedAt: '2025-12-25', status: 'processing' },
-  ]);
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  const fetchDocuments = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await documentsAPI.getAll();
+      setDocuments(response.data);
+    } catch (err: any) {
+      console.error('Erreur lors du chargement des documents:', err);
+      setError(err.response?.data?.detail || 'Erreur de chargement');
+      // Fallback vers données mock en cas d'erreur
+      setDocuments([
+        { id: 1, name: 'PLU_Paris_16.pdf', type: 'PLU', size: '2.4 MB', uploadedAt: '2025-12-30', status: 'processed' },
+        { id: 2, name: 'DPE_Rapport.pdf', type: 'Diagnostic', size: '856 KB', uploadedAt: '2025-12-28', status: 'processed' },
+        { id: 3, name: 'Plan_Cadastral.pdf', type: 'Cadastre', size: '1.2 MB', uploadedAt: '2025-12-25', status: 'processing' },
+      ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    setError(null);
+    try {
+      await documentsAPI.upload(file);
+      await fetchDocuments(); // Recharger la liste
+      alert('✅ Document uploadé avec succès !');
+    } catch (err: any) {
+      console.error('Erreur upload:', err);
+      setError(err.response?.data?.detail || 'Erreur lors de l\'upload');
+      alert('❌ Erreur lors de l\'upload du document');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleDelete = async (id: number, name: string) => {
+    if (!confirm(`Supprimer "${name}" ?`)) return;
+    
+    try {
+      await documentsAPI.delete(id);
+      await fetchDocuments(); // Recharger la liste
+      alert('✅ Document supprimé');
+    } catch (err: any) {
+      console.error('Erreur suppression:', err);
+      alert('❌ Erreur lors de la suppression');
+    }
+  };
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleUpload(file);
+    }
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   const getTypeColor = (type: string) => {
     switch (type) {
@@ -55,27 +120,43 @@ export default function DocumentsPage() {
               <h1 className="text-3xl font-bold text-gray-900">Documents</h1>
               <p className="text-gray-600 mt-1">Gérez et analysez vos documents de projet</p>
             </div>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors">
+            <button 
+              onClick={triggerFileInput}
+              disabled={uploading}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
-              Téléverser
+              {uploading ? 'Upload...' : 'Téléverser'}
             </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".pdf,.png,.jpg,.jpeg,.doc,.docx"
+              onChange={handleFileSelect}
+              className="hidden"
+            />
           </div>
         </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Upload Zone */}
-        <div className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-12 text-center mb-8 hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer">
+        <div 
+          onClick={triggerFileInput}
+          className="bg-white rounded-lg border-2 border-dashed border-gray-300 p-12 text-center mb-8 hover:border-blue-500 hover:bg-blue-50 transition cursor-pointer"
+        >
           <div className="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mx-auto mb-4">
             <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Glissez vos documents ici</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            {uploading ? '⏳ Upload en cours...' : 'Glissez vos documents ici'}
+          </h3>
           <p className="text-gray-600 mb-4">ou cliquez pour parcourir vos fichiers</p>
-          <p className="text-sm text-gray-500">PDF, PNG, JPG jusqu'à 10MB</p>
+          <p className="text-sm text-gray-500">PDF, PNG, JPG, DOC, DOCX jusqu'à 10MB</p>
         </div>
 
         {/* Documents Categories */}
@@ -204,7 +285,12 @@ export default function DocumentsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
                     <button className="text-blue-600 hover:text-blue-700 mr-3">Voir</button>
                     <button className="text-gray-600 hover:text-gray-700 mr-3">Télécharger</button>
-                    <button className="text-red-600 hover:text-red-700">Supprimer</button>
+                    <button 
+                      onClick={() => handleDelete(doc.id, doc.name)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      Supprimer
+                    </button>
                   </td>
                 </tr>
               ))}

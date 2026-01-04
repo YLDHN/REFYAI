@@ -26,7 +26,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       // Redirection vers login si non authentifié
       localStorage.removeItem('auth_token');
-      window.location.href = '/login';
+      window.location.href = '/auth/login';
     }
     console.error('API Error:', error.response?.status, error.response?.data);
     return Promise.reject(error);

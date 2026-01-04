@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import Link from 'next/link';
+import { useProjects } from '@/lib/hooks';
 
 interface Project {
   id: number;
@@ -15,16 +16,29 @@ interface Project {
   updatedAt: string;
 }
 
-const mockProjects: Project[] = [];
-
 export default function ProjectsPage() {
+  const { projects, loading, error, fetchProjects, deleteProject } = useProjects();
   const [filter, setFilter] = useState<string>('all');
   const [sortBy, setSortBy] = useState<string>('date');
 
-  const filteredProjects = mockProjects.filter(project => {
+  useEffect(() => {
+    fetchProjects();
+  }, []);
+
+  const filteredProjects = (projects as any[]).filter((project: any) => {
     if (filter === 'all') return true;
     return project.status === filter;
   });
+
+  const handleDelete = async (id: number) => {
+    if (confirm('Voulez-vous vraiment supprimer ce projet ?')) {
+      try {
+        await deleteProject(id);
+      } catch (err) {
+        alert('Erreur lors de la suppression');
+      }
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -58,7 +72,7 @@ export default function ProjectsPage() {
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
-                Tous ({mockProjects.length})
+                Tous ({projects.length})
               </button>
               <button 
                 onClick={() => setFilter('in_progress')}

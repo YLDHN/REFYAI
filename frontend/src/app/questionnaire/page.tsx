@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { questionnaireAPI } from '@/lib/api';
 
 interface Question {
   id: string;
@@ -151,34 +152,25 @@ export default function QuestionnairePage() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // TODO: Appel API backend
-      const response = await fetch('http://localhost:8000/api/v1/questionnaire/validate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answers })
-      });
-
-      const data = await response.json();
+      // Validation avec API backend
+      const validateResponse = await questionnaireAPI.validateAnswers(answers);
+      const data = validateResponse.data;
       
       if (data.valid) {
         // Extraire filtres PLU
-        const filtersResponse = await fetch('http://localhost:8000/api/v1/questionnaire/extract-filters', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ answers })
-        });
-        
-        const filters = await filtersResponse.json();
+        const filtersResponse = await questionnaireAPI.extractFilters(answers);
+        const filters = filtersResponse.data;
         
         // Rediriger vers résultats
-        alert('Questionnaire validé ! Filtres PLU extraits.');
-        console.log('Filtres:', filters);
+        alert('✅ Questionnaire validé ! Filtres PLU extraits.');
+        console.log('Filtres PLU:', filters);
+        // TODO: Rediriger vers page de résultats avec les filtres
       } else {
         setErrors(data.errors || {});
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Erreur:', error);
-      alert('Erreur lors de la soumission');
+      alert(error.response?.data?.detail || 'Erreur lors de la soumission');
     } finally {
       setLoading(false);
     }
