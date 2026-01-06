@@ -6,6 +6,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "REFY AI API"
     VERSION: str = "0.1.0"
     API_V1_STR: str = "/api/v1"
+    DEBUG: bool = False
     
     # Sécurité
     SECRET_KEY: str = "votre-cle-secrete-a-changer-en-production"
@@ -22,8 +23,20 @@ class Settings(BaseSettings):
         "https://*.vercel.app",
     ]
     
+    # Performance & Robustesse
+    API_TIMEOUT: int = 60  # Timeout en secondes
+    MAX_CONNECTIONS: int = 100  # Pool de connexions DB
+    CONNECTION_TIMEOUT: int = 30  # Timeout connexion DB
+    REQUEST_RATE_LIMIT: int = 100  # Requêtes max par minute par IP
+    ENABLE_RETRY: bool = True  # Retry automatique sur erreurs temporaires
+    
     # Base de données
     DATABASE_URL: str = "postgresql+asyncpg://refyai:refyai@localhost:5432/refyai"
+    
+    # Celery & Redis
+    CELERY_BROKER_URL: str = "redis://localhost:6379/0"
+    CELERY_RESULT_BACKEND: str = "redis://localhost:6379/0"
+    REDIS_URL: str = "redis://localhost:6379/1"
     
     # IA
     OPENAI_API_KEY: str = ""

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Tests REFYAI</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        
+        .icon.success { background: #d4edda; color: #28a745; }
+        .icon.info { background: #d1ecf1; color: #17a2b8; }
+        .icon.warning { background: #fff3cd; color: #ffc107; }
+        
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .card-body {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .command {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 10px 0;
+            overflow-x: auto;
+        }
+        
+        .btn {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        
+        .btn:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .btn-success {
+            background: #28a745;
+        }
+        
+        .btn-success:hover {
+            background: #218838;
+        }
+        
+        .actions {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+        
+        .status {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status.running {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        .status.passed {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .test-list {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .test-item {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .test-item:last-child {
+            border-bottom: none;
+        }
+        
+        .test-name {
+            font-weight: 500;
+            color: #333;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .badge.success { background: #28a745; color: white; }
+        .badge.info { background: #17a2b8; color: white; }
+        .badge.secondary { background: #6c757d; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 Dashboard Tests REFYAI</h1>
+            <p class="subtitle">Tests End-to-End avec Playwright</p>
+        </header>
+        
+        <div class="cards">
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon success">🎬</div>
+                    <div>
+                        <div class="card-title">Mode UI Interactif</div>
+                        <span class="badge info">Recommandé</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Interface graphique pour voir les tests en temps réel, les rejouer, et déboguer facilement.</p>
+                    <div class="command">npm run test:ui</div>
+                    <div class="actions">
+                        <button class="btn btn-success" onclick="runCommand('test:ui')">▶️ Lancer</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon info">👁️</div>
+                    <div>
+                        <div class="card-title">Mode Visible (Headed)</div>
+                        <span class="badge success">Démo</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Voir le navigateur Chrome s'ouvrir et exécuter les tests automatiquement.</p>
+                    <div class="command">npm run test:headed</div>
+                    <div class="actions">
+                        <button class="btn btn-success" onclick="runCommand('test:headed')">▶️ Lancer</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <div class="icon warning">🐛</div>
+                    <div>
+                        <div class="card-title">Mode Debug</div>
+                        <span class="badge secondary">Avancé</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p>Exécution pas à pas avec console de débogage pour inspecter chaque étape.</p>
+                    <div class="command">npm run test:debug</div>
+                    <div class="actions">
+                        <button class="btn" onclick="runCommand('test:debug')">▶️ Lancer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="test-list">
+            <h2 style="margin-bottom: 20px; color: #333;">📋 Tests Disponibles</h2>
+            
+            <div class="test-item">
+                <div>
+                    <div class="test-name">🎬 Démonstration complète</div>
+                    <small style="color: #666;">Flux connexion → dashboard → déconnexion</small>
+                </div>
+                <span class="badge success">4 tests</span>
+            </div>
+            
+            <div class="test-item">
+                <div>
+                    <div class="test-name">🔐 Tests d'authentification</div>
+                    <small style="color: #666;">Login, logout, tokens JWT, redirections</small>
+                </div>
+                <span class="badge success">8 tests</span>
+            </div>
+            
+            <div class="test-item">
+                <div>
+                    <div class="test-name">🔌 Tests API Backend</div>
+                    <small style="color: #666;">CRUD complet, sécurité, validation</small>
+                </div>
+                <span class="badge success">9 tests</span>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <p style="color: #666; margin-bottom: 15px;">Total: <strong>21 tests</strong> couvrant toute l'application</p>
+                <button class="btn btn-success" onclick="runCommand('test')">🚀 Lancer tous les tests</button>
+                <button class="btn" onclick="showReport()" style="margin-left: 10px;">📊 Voir le rapport</button>
+            </div>
+        </div>
+        
+        <div style="margin-top: 40px; text-align: center; color: white; opacity: 0.8;">
+            <p>💡 <strong>Astuce:</strong> Utilisez le mode UI pour une expérience interactive optimale</p>
+            <p style="margin-top: 10px;">📚 Voir <a href="tests/VISUAL_GUIDE.md" style="color: white;">VISUAL_GUIDE.md</a> pour plus d'informations</p>
+        </div>
+    </div>
+    
+    <script>
+        function runCommand(command) {
+            alert(`Pour lancer ce test:\n\n1. Ouvrez un terminal\n2. cd /Users/yld/Documents/REFYAI/frontend\n3. npm run ${command}\n\nOu copiez cette commande:\ncd /Users/yld/Documents/REFYAI/frontend && npm run ${command}`);
+            
+            // Copier dans le presse-papier
+            const cmd = `cd /Users/yld/Documents/REFYAI/frontend && npm run ${command}`;
+            navigator.clipboard.writeText(cmd).then(() => {
+                console.log('Commande copiée dans le presse-papier!');
+            });
+        }
+        
+        function showReport() {
+            alert('Pour voir le rapport HTML:\n\n1. Lancez d\'abord les tests\n2. Puis: npm run test:report\n\nLe rapport s\'ouvrira automatiquement dans votre navigateur.');
+        }
+        
+        // Animation au chargement
+        window.addEventListener('load', () => {
+            const cards = document.querySelectorAll('.card, .test-list');
+            cards.forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '0';
+                    card.style.transform = 'translateY(20px)';
+                    card.style.transition = 'all 0.5s ease';
+                    
+                    setTimeout(() => {
+                        card.style.opacity = '1';
+                        card.style.transform = 'translateY(0)';
+                    }, 50);
+                }, index * 100);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -25,7 +25,9 @@ export default function ProjectsPage() {
     fetchProjects();
   }, []);
 
-  const filteredProjects = (projects as any[]).filter((project: any) => {
+  const projectsArray = Array.isArray(projects) ? projects : [];
+  
+  const filteredProjects = projectsArray.filter((project: any) => {
     if (filter === 'all') return true;
     return project.status === filter;
   });

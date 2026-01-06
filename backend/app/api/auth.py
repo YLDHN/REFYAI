@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from typing import List
@@ -25,6 +26,7 @@ class UserLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"
+    user: dict
 
 class UserResponse(BaseModel):
     id: int
@@ -65,17 +67,20 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     
     return user
 
-@router.post("/login", response_model=Token)
-async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
+@router.post("/login")
+async def login(
+    form_data: OAuth2PasswordRequestForm = Depends(),
+    db: AsyncSession = Depends(get_db)
+):
     """Connexion utilisateur"""
     
     # Récupérer l'utilisateur
     result = await db.execute(
-        select(User).where(User.email == credentials.email)
+        select(User).where(User.email == form_data.username)
     )
     user = result.scalar_one_or_none()
     
-    if not user or not verify_password(credentials.password, user.hashed_password):
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Email ou mot de passe incorrect"
@@ -92,7 +97,17 @@ async def login(credentials: UserLogin, db: AsyncSession = Depends(get_db)):
         data={"sub": str(user.id), "email": user.email}
     )
     
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "is_active": user.is_active,
+            "is_superuser": user.is_superuser
+        }
+    }
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user(

@@ -17,7 +17,7 @@ class ProjectCreate(BaseModel):
     address: str | None = None
     city: str | None = None
     postal_code: str | None = None
-    project_type: str  # rental, resale, mixed
+    project_type: str | None = "rental"  # rental, resale, mixed - avec défaut
     
     # Nouveaux champs
     strategy: str | None = None  # core, core_plus, value_add
@@ -97,9 +97,19 @@ class ProjectResponse(BaseModel):
     walt: float | None = None
     acquisition_yield: float | None = None
     
+    # Acquisition
+    acquisition_price: float | None = None
+    notary_fees: float | None = None
+    due_diligence_cost: float | None = None
+    
+    # CAPEX
+    capex_details: dict | None = None
+    
     # Financement
+    financing_amount: float | None = None
     ltv: float | None = None
     interest_rate: float | None = None
+    loan_duration: int | None = None
     
     # Scores
     technical_score: float | None
@@ -146,8 +156,9 @@ async def list_projects(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_active_user)
 ):
-    """Lister tous les projets"""
+    """Lister tous les projets de l'utilisateur connecté"""
     
+    # Filtrer par utilisateur
     query = select(Project).where(Project.user_id == current_user.id)
     
     if status:
@@ -163,12 +174,16 @@ async def list_projects(
 @router.get("/{project_id}", response_model=ProjectResponse)
 async def get_project(
     project_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Récupérer un projet par ID"""
     
     result = await db.execute(
-        select(Project).where(Project.id == project_id)
+        select(Project).where(
+            Project.id == project_id,
+            Project.user_id == current_user.id
+        )
     )
     project = result.scalar_one_or_none()
     
@@ -184,12 +199,16 @@ async def get_project(
 async def update_project(
     project_id: int,
     project_data: ProjectUpdate,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Mettre à jour un projet"""
     
     result = await db.execute(
-        select(Project).where(Project.id == project_id)
+        select(Project).where(
+            Project.id == project_id,
+            Project.user_id == current_user.id
+        )
     )
     project = result.scalar_one_or_none()
     
@@ -211,12 +230,16 @@ async def update_project(
 @router.delete("/{project_id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_project(
     project_id: int,
-    db: AsyncSession = Depends(get_db)
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_active_user)
 ):
     """Supprimer un projet"""
     
     result = await db.execute(
-        select(Project).where(Project.id == project_id)
+        select(Project).where(
+            Project.id == project_id,
+            Project.user_id == current_user.id
+        )
     )
     project = result.scalar_one_or_none()
     
@@ -230,3 +253,148 @@ async def delete_project(
     await db.commit()
     
     return None
+
+
+@router.get("/{project_id}/technical-score")
+async def get_technical_score(
+    project_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Calcule le score technique d'un projet"""
+    from app.services.capex_service import CapexService
+    
+    result = await db.execute(
+        select(Project).where(Project.id == project_id)
+    )
+    project = result.scalar_one_or_none()
+    
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Projet non trouvé"
+        )
+    
+    service = CapexService()
+    score = service.calculate_technical_score(
+        construction_year=project.construction_year or 2000,
+        last_renovation_year=None,
+        structural_issues=False,
+        accessibility_compliant=True
+    )
+    
+    # Déterminer grade
+    if score >= 80:
+        grade = "A"
+    elif score >= 60:
+        grade = "B"
+    elif score >= 40:
+        grade = "C"
+    else:
+        grade = "D"
+    
+    return {
+        "score": score,
+        "grade": grade,
+        "penalties": []
+    }
+
+
+@router.post("/{project_id}/capex/suggest")
+async def suggest_capex(
+    project_id: int,
+    request_data: dict,
+    db: AsyncSession = Depends(get_db)
+):
+    """Suggère un montant CAPEX pour un projet"""
+    from app.services.capex_service import CapexService
+    
+    result = await db.execute(
+        select(Project).where(Project.id == project_id)
+    )
+    project = result.scalar_one_or_none()
+    
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Projet non trouvé"
+        )
+    
+    service = CapexService()
+    suggestion = service.suggest_capex_budget(
+        surface_m2=project.surface or 1000,
+        typologie=request_data.get("typologie", "RENOVATION"),
+        city_tier=request_data.get("city_tier", "TIER_1")
+    )
+    
+    return {
+        "suggested_amount": suggestion["suggested_budget"],
+        "confidence": suggestion.get("confidence", "MEDIUM"),
+        "breakdown": suggestion.get("breakdown", {})
+    }
+
+
+@router.get("/{project_id}/documents/missing")
+async def get_missing_documents(
+    project_id: int,
+    db: AsyncSession = Depends(get_db)
+):
+    """Liste les documents manquants pour un projet"""
+    from app.services.document_service import DocumentService
+    
+    result = await db.execute(
+        select(Project).where(Project.id == project_id)
+    )
+    project = result.scalar_one_or_none()
+    
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Projet non trouvé"
+        )
+    
+    service = DocumentService()
+    missing = service.check_missing_documents(
+        project_type=project.project_type or "rental",
+        uploaded_docs=[]
+    )
+    
+    return missing
+
+
+@router.post("/{project_id}/business-plan/generate")
+async def generate_business_plan(
+    project_id: int,
+    request_data: dict,
+    db: AsyncSession = Depends(get_db)
+):
+    """Génère un business plan pour un projet"""
+    from app.services.financial_service import FinancialService
+    
+    result = await db.execute(
+        select(Project).where(Project.id == project_id)
+    )
+    project = result.scalar_one_or_none()
+    
+    if not project:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Projet non trouvé"
+        )
+    
+    service = FinancialService()
+    
+    # Calculer IRR
+    cash_flows = [-request_data.get("capex_total", 500000)]
+    monthly_rent = request_data.get("monthly_rent", 10000)
+    for _ in range(10):
+        cash_flows.append(monthly_rent * 12)
+    
+    irr = service.calculate_irr(cash_flows)
+    multiple = 2.5  # Placeholder
+    
+    return {
+        "irr": irr,
+        "multiple": multiple,
+        "ltv": 0.65,
+        "dscr": 1.3
+    }

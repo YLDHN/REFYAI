@@ -13,10 +13,16 @@ from app.api import (
     market,
     interest_rate,
     capex,
-    admin_delays
+    admin_delays,
+    timeline,
+    asset_management,
+    scraper,
+    compliance,
+    scoring,
+    exports
 )
 
-api_router = APIRouter(prefix="/api/v1")
+api_router = APIRouter(prefix="/api")
 
 # Inclusion des routes
 api_router.include_router(auth.router)
@@ -31,3 +37,9 @@ api_router.include_router(market.router)
 api_router.include_router(interest_rate.router)
 api_router.include_router(capex.router)
 api_router.include_router(admin_delays.router)
+api_router.include_router(timeline.router)
+api_router.include_router(asset_management.router)
+api_router.include_router(scraper.router)
+api_router.include_router(compliance.router)
+api_router.include_router(scoring.router)
+api_router.include_router(exports.router)

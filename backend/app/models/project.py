@@ -58,6 +58,19 @@ class Project(Base):
     occupancy_rate = Column(Float)  # Taux d'occupation %
     lease_state = Column(JSON)  # État locatif détaillé
     
+    # === ASSET MANAGEMENT (NOUVEAU) ===
+    # Franchise de loyer (Rent Free)
+    rent_free_months = Column(Integer, default=0)  # Nombre de mois sans loyer
+    
+    # Tenant Improvements (Travaux preneur)
+    tenant_improvements = Column(Float, default=0)  # Contribution bailleur aux travaux locataire
+    
+    # Indexation des loyers
+    indexation_type = Column(String, default="ILAT")  # ICC, ILAT, ILC, FIXED
+    indexation_rate = Column(Float)  # Taux d'indexation annuel (si None, utilise historique)
+    indexation_start_year = Column(Integer, default=2)  # Année de début indexation
+    last_indexation_date = Column(DateTime(timezone=True))  # Dernière indexation appliquée
+    
     # Data acquisition
     acquisition_price = Column(Float)
     notary_fees = Column(Float)

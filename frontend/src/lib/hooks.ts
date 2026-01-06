@@ -48,9 +48,12 @@ export function useProjects() {
     setError(null);
     try {
       const response = await apiClient.get('/projects');
-      setProjects(response.data);
+      // S'assurer que c'est un tableau
+      const data = Array.isArray(response.data) ? response.data : [];
+      setProjects(data);
     } catch (err: any) {
       setError(err.response?.data?.detail || 'Erreur lors du chargement');
+      setProjects([]); // Remettre un tableau vide en cas d'erreur
     } finally {
       setLoading(false);
     }

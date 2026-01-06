@@ -29,7 +29,9 @@ export default function DocumentsPage() {
     setError(null);
     try {
       const response = await documentsAPI.getAll();
-      setDocuments(response.data);
+      // S'assurer que c'est un tableau
+      const docs = Array.isArray(response.data) ? response.data : [];
+      setDocuments(docs);
     } catch (err: any) {
       console.error('Erreur lors du chargement des documents:', err);
       setError(err.response?.data?.detail || 'Erreur de chargement');

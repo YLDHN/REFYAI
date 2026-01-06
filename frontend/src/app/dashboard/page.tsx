@@ -1,183 +1,180 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import Link from 'next/link';
-import { useProjects } from '@/lib/hooks';
+import React from 'react';
+import { useRouter } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
+import { DataGrid, projectColumns, type Project } from '@/components/ui/data-grid';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Button } from '@/components/ui/Button';
+import { Badge } from '@/components/ui/Badge';
+import { Plus, TrendingUp, AlertTriangle, FileText, LogOut, User } from 'lucide-react';
+
+interface DashboardStats {
+  total_projects: number;
+  active_projects: number;
+  average_tri: number;
+  total_investment: number;
+}
 
 export default function DashboardPage() {
-  const { projects, loading, fetchProjects } = useProjects();
-  const [stats, setStats] = useState([
-    { label: 'Projets Actifs', value: '0', icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', color: 'blue', trend: '-' },
-    { label: 'TRI Moyen', value: '0%', icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', color: 'green', trend: '-' },
-    { label: 'Investissement', value: '0€', icon: 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z', color: 'purple', trend: '-' },
-    { label: 'Documents', value: '0', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', color: 'orange', trend: '-' },
-  ]);
+  const router = useRouter();
+  const { user, logout, isAuthenticated } = useAuthStore();
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
-  useEffect(() => {
-    if (projects.length > 0) {
-      const activeProjects = projects.filter((p: any) => p.status === 'in_progress' || p.status === 'draft');
-      const totalInvestment = projects.reduce((sum: number, p: any) => sum + (p.purchase_price || 0) + (p.renovation_budget || 0), 0);
-      const avgTRI = projects.filter((p: any) => p.financial_analysis?.tri).reduce((sum: number, p: any) => sum + (p.financial_analysis.tri || 0), 0) / projects.length || 0;
-      
-      setStats([
-        { ...stats[0], value: activeProjects.length.toString() },
-        { ...stats[1], value: `${avgTRI.toFixed(1)}%` },
-        { ...stats[2], value: `${(totalInvestment / 1000000).toFixed(1)}M€` },
-        { ...stats[3], value: '0' }, // À calculer avec les documents
-      ]);
+  // Rediriger si non authentifié
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      router.push('/login');
     }
+  }, [isAuthenticated, router]);
+
+  const handleLogout = () => {
+    logout();
+    router.push('/login');
+  };
+
+  // Charger les projets
+  const { data: projectsData, isLoading: projectsLoading } = useQuery({
+    queryKey: ['projects'],
+    queryFn: async () => {
+      try {
+        const response = await apiClient.get('/projects');
+        return response.data;
+      } catch (error) {
+        console.error('Erreur lors du chargement des projets:', error);
+        return [];
+      }
+    },
+  });
+
+  const projects: Project[] = Array.isArray(projectsData) ? projectsData : [];
+
+  // Calculer les stats
+  const stats: DashboardStats = React.useMemo(() => {
+    return {
+      total_projects: projects.length,
+      active_projects: projects.filter(p => p.status === 'En cours').length,
+      average_tri: projects.length > 0
+        ? projects.reduce((sum, p) => sum + (p.tri_avant_is || 0), 0) / projects.length
+        : 0,
+      total_investment: projects.reduce((sum, p) => sum + (p.prix_acquisition || 0), 0),
+    };
   }, [projects]);
 
-  const recentProjects = (projects as any[]).slice(0, 5);
-
   return (
-    <DashboardLayout>
-      <div className="space-y-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-purple-950 p-6">
+      <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-            <p className="text-gray-600 mt-1">Vue d'ensemble de vos projets immobiliers</p>
+            <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
+            <p className="text-gray-400">Vue d'ensemble de vos projets immobiliers</p>
           </div>
-          <Link 
-            href="/projects/new"
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium flex items-center gap-2 transition-colors"
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-            </svg>
-            Nouveau Projet
-          </Link>
+          <div className="flex items-center gap-3">
+            {user && (
+              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
+                <User className="w-4 h-4 text-gray-400" />
+                <span className="text-sm text-gray-300">{user.email}</span>
+              </div>
+            )}
+            <Button
+              onClick={handleLogout}
+              variant="outline"
+              className="border-gray-700 text-gray-300 hover:bg-red-600 hover:border-red-600 hover:text-white"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Déconnexion
+            </Button>
+            <Button
+              onClick={() => router.push('/projects/new')}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nouveau Projet
+            </Button>
+          </div>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {stats.map((stat, index) => (
-            <div key={index} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                  <p className={`text-sm mt-2 font-medium ${
-                    stat.color === 'blue' ? 'text-blue-600' :
-                    stat.color === 'green' ? 'text-green-600' :
-                    stat.color === 'purple' ? 'text-purple-600' :
-                    'text-orange-600'
-                  }`}>
-                    {stat.trend} ce mois
-                  </p>
+                  <p className="text-sm text-gray-400 mb-1">Projets Totaux</p>
+                  <p className="text-3xl font-bold text-white">{stats.total_projects}</p>
                 </div>
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  stat.color === 'blue' ? 'bg-blue-100' :
-                  stat.color === 'green' ? 'bg-green-100' :
-                  stat.color === 'purple' ? 'bg-purple-100' :
-                  'bg-orange-100'
-                }`}>
-                  <svg 
-                    className={`w-6 h-6 ${
-                      stat.color === 'blue' ? 'text-blue-600' :
-                      stat.color === 'green' ? 'text-green-600' :
-                      stat.color === 'purple' ? 'text-purple-600' :
-                      'text-orange-600'
-                    }`} 
-                    fill="none" 
-                    stroke="currentColor" 
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={stat.icon} />
-                  </svg>
+                <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                  <FileText className="w-6 h-6 text-blue-400" />
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            </CardContent>
+          </Card>
 
-        {/* Recent Projects */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-bold text-gray-900">Projets Récents</h2>
-              <Link href="/projects" className="text-blue-600 hover:text-blue-700 text-sm font-medium">
-                Voir tout →
-              </Link>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="space-y-4">
-              {recentProjects.map((project) => (
-                <div key={project.id} className="flex items-center justify-between p-4 hover:bg-gray-50 rounded-lg transition-colors">
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-gray-900">{project.name}</h3>
-                    <p className="text-sm text-gray-600">{project.city}</p>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <div className="text-right">
-                      <p className="text-sm text-gray-600">TRI</p>
-                      <p className="font-semibold text-green-600">{project.tri}</p>
-                    </div>
-                    <div className="w-32">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{ width: `${project.progress}%` }}
-                          />
-                        </div>
-                        <span className="text-sm text-gray-600 w-12">{project.progress}%</span>
-                      </div>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      project.status === 'Complété' ? 'bg-green-100 text-green-700' :
-                      project.status === 'En cours' ? 'bg-blue-100 text-blue-700' :
-                      'bg-yellow-100 text-yellow-700'
-                    }`}>
-                      {project.status}
-                    </span>
-                  </div>
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">En Cours</p>
+                  <p className="text-3xl font-bold text-white">{stats.active_projects}</p>
                 </div>
-              ))}
-            </div>
-          </div>
+                <div className="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                  <AlertTriangle className="w-6 h-6 text-yellow-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">TRI Moyen</p>
+                  <p className="text-3xl font-bold text-white">
+                    {(stats.average_tri * 100).toFixed(1)}%
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-green-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="bg-gray-900/50 border-gray-800">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-400 mb-1">Investissement Total</p>
+                  <p className="text-2xl font-bold text-white">
+                    {(stats.total_investment / 1000000).toFixed(1)}M€
+                  </p>
+                </div>
+                <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-purple-400" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Link href="/projects/new" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Créer un Projet</h3>
-            <p className="text-sm text-gray-600">Lancez une nouvelle analyse immobilière</p>
-          </Link>
-
-          <Link href="/documents" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group">
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
-              <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Importer des Documents</h3>
-            <p className="text-sm text-gray-600">Ajoutez vos PLU, diagnostics, photos</p>
-          </Link>
-
-          <Link href="/chat" className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow group">
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-              </svg>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Consulter l'IA</h3>
-            <p className="text-sm text-gray-600">Posez vos questions immobilières</p>
-          </Link>
-        </div>
+        {/* Projects Table */}
+        <Card className="bg-gray-900/50 border-gray-800">
+          <CardHeader>
+            <CardTitle className="text-white">Tous les Projets</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DataGrid
+              data={projects}
+              columns={projectColumns}
+              onRowClick={(project) => router.push(`/projects/${project.id}`)}
+              loading={projectsLoading}
+              emptyMessage="Aucun projet créé. Commencez par créer votre premier projet !"
+            />
+          </CardContent>
+        </Card>
       </div>
-    </DashboardLayout>
+    </div>
   );
 }

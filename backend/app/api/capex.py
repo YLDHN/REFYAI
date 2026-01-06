@@ -5,6 +5,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional
 from app.services.capex_service import capex_service, CityTier
+from app.services.capex_ai_service import capex_ai_service
 
 router = APIRouter(prefix="/capex", tags=["CAPEX"])
 
@@ -165,3 +166,49 @@ async def get_city_tiers():
             }
         ]
     }
+
+
+# === NOUVEAU : ENDPOINT IA ===
+
+class CAPEXAISuggestRequest(BaseModel):
+    project_description: str
+    surface: float
+    typologie: str  # NEUF, RENOVATION, CONVERSION, etc.
+    city_tier: int = 1
+
+
+@router.post("/suggest")
+async def suggest_capex_with_ai(request: CAPEXAISuggestRequest):
+    """
+    🤖 NOUVEAU : Suggestions CAPEX intelligentes avec IA
+    
+    Utilise:
+    - LangChain + GPT-4 pour analyse projet
+    - ChromaDB RAG pour projets similaires historiques
+    - Base de données CAPEX pour coûts réels
+    
+    Body:
+        {
+            "project_description": "Réhabilitation immeuble 1900 avec 8 appartements, façade à refaire",
+            "surface": 800,
+            "typologie": "RENOVATION",
+            "city_tier": 1
+        }
+    
+    Returns:
+        Suggestions détaillées avec postes + quantités + estimations
+    """
+    result = await capex_ai_service.suggest_capex_with_ai(
+        project_description=request.project_description,
+        surface=request.surface,
+        typologie=request.typologie,
+        city_tier=request.city_tier
+    )
+    
+    if not result.get("success"):
+        raise HTTPException(
+            status_code=500,
+            detail=result.get("error", "Erreur IA")
+        )
+    
+    return result
