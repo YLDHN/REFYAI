@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Any
+import json
+from pydantic import field_validator
 
 class Settings(BaseSettings):
     # Projet
@@ -22,6 +24,24 @@ class Settings(BaseSettings):
         "https://refyai.vercel.app",
         "https://*.vercel.app",
     ]
+
+    @field_validator('ALLOWED_ORIGINS', mode='before')
+    def _parse_allowed_origins(cls, v: Any):
+        """Accept JSON array or comma-separated string in env var for ALLOWED_ORIGINS."""
+        if isinstance(v, str):
+            s = v.strip()
+            # Try JSON array first
+            try:
+                parsed = json.loads(s)
+                if isinstance(parsed, list):
+                    return parsed
+            except Exception:
+                pass
+
+            # Fallback: comma separated
+            return [p.strip() for p in s.split(',') if p.strip()]
+
+        return v
     
     # Performance & Robustesse
     API_TIMEOUT: int = 60  # Timeout en secondes
