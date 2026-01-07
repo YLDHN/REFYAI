@@ -12,10 +12,13 @@ interface Project {
   name: string;
   address: string;
   type: 'rental' | 'resale' | 'mixed';
-  status: 'draft' | 'in_progress' | 'completed';
+  status: 'analyzing' | 'negotiating' | 'offer_sent' | 'financing_search' | 'due_diligence' | 'under_contract' | 'acquired' | 'rejected' | 'draft' | 'in_progress' | 'completed';
   tri: number;
   investment: number;
   updatedAt: string;
+  strategy?: 'core' | 'core_plus' | 'value_add';
+  budget_total?: number;
+  technical_score?: number;
 }
 
 export default function ProjectsPage() {
