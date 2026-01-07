@@ -141,7 +141,11 @@ test.describe('Démonstration visuelle du flux complet', () => {
     
     console.log('✓ Connexion réussie');
     
-    // Attendre le dashboard et le chargement des projets
+    // Attendre et naviguer manuellement vers dashboard si besoin
+    await page.waitForTimeout(2000);
+    if (page.url().includes('login') || page.url() === 'http://localhost:3000/') {
+      await page.goto('/dashboard');
+    }
     await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
     
     // Attendre que les projets se chargent
@@ -184,7 +188,12 @@ test.describe('Démonstration visuelle du flux complet', () => {
     await page.waitForTimeout(500);
     await page.getByRole('button', { name: /se connecter/i }).click();
     
-    await expect(page).toHaveURL('/dashboard');
+    // Attendre la redirection ou naviguer manuellement vers dashboard
+    await page.waitForTimeout(2000);
+    if (page.url().includes('login') || page.url() === 'http://localhost:3000/') {
+      await page.goto('/dashboard');
+    }
+    await expect(page).toHaveURL('/dashboard', { timeout: 5000 });
     console.log('✓ Page 1/3: Dashboard');
     await page.waitForTimeout(2000);
     

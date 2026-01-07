@@ -291,7 +291,7 @@ class CAPEXService:
         costs_per_m2 = {
             "light": {"min": 300, "avg": 450, "max": 600},      # Rafraîchissement
             "medium": {"min": 600, "avg": 900, "max": 1200},    # Rénovation partielle
-            "heavy": {"min": 200, "avg": 600, "max": 1000},   # Rénovation lourde (restructuration)
+            "heavy": {"min": 1000, "avg": 1400, "max": 1800},   # Rénovation lourde (restructuration)
             "complete": {"min": 2000, "avg": 2500, "max": 3500} # Rénovation complète
         }
         

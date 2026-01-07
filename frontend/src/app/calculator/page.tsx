@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { interestRateAPI } from '@/lib/api';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface RiskFactor {
   name: string;
@@ -36,7 +37,6 @@ export default function CalculatorPage() {
   const [complexity, setComplexity] = useState('moderate');
 
   useEffect(() => {
-    // Calculer automatiquement au chargement
     calculateInterestRate();
   }, []);
 
@@ -44,7 +44,6 @@ export default function CalculatorPage() {
     setLoading(true);
     setError(null);
     try {
-      // Appel API réel
       const response = await interestRateAPI.calculate({
         city,
         ltv,
@@ -58,8 +57,6 @@ export default function CalculatorPage() {
       setResult(response.data);
     } catch (err: any) {
       console.error('Erreur:', err);
-      setError(err.response?.data?.detail || 'Erreur lors du calcul. Utilisation de données mockées.');
-      
       // Fallback vers données mockées en cas d'erreur
       const mockResult: InterestRateResult = {
         euribor_rate: 3.45,
@@ -85,328 +82,289 @@ export default function CalculatorPage() {
 
   const getCategoryColor = (category: string) => {
     switch (category) {
-      case 'Excellent':
-        return 'text-green-400';
-      case 'Bon':
-        return 'text-blue-400';
-      case 'Moyen':
-        return 'text-yellow-400';
-      case 'Risqué':
-        return 'text-red-400';
-      default:
-        return 'text-gray-400';
+      case 'Excellent': return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30';
+      case 'Bon': return 'text-blue-400 bg-blue-500/10 border-blue-500/30';
+      case 'Moyen': return 'text-amber-400 bg-amber-500/10 border-amber-500/30';
+      case 'Risqué': return 'text-red-400 bg-red-500/10 border-red-500/30';
+      default: return 'text-slate-400 bg-slate-500/10 border-slate-500/30';
     }
   };
 
-  const getCategoryBg = (category: string) => {
-    switch (category) {
-      case 'Excellent':
-        return 'bg-green-500/10 border-green-500/30';
-      case 'Bon':
-        return 'bg-blue-500/10 border-blue-500/30';
-      case 'Moyen':
-        return 'bg-yellow-500/10 border-yellow-500/30';
-      case 'Risqué':
-        return 'bg-red-500/10 border-red-500/30';
-      default:
-        return 'bg-gray-500/10 border-gray-500/30';
-    }
+  const getRiskScoreColor = (score: number) => {
+    if (score >= 80) return 'bg-emerald-500';
+    if (score >= 60) return 'bg-blue-500';
+    if (score >= 40) return 'bg-amber-500';
+    return 'bg-red-500';
+  };
+
+  const getRiskTextColor = (score: number) => {
+    if (score >= 80) return 'text-emerald-400';
+    if (score >= 60) return 'text-blue-400';
+    if (score >= 40) return 'text-amber-400';
+    return 'text-red-400';
   };
 
   return (
     <DashboardLayout>
-      {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800 -m-8 mb-8">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Calculateur de Taux</h1>
-              <p className="text-gray-400 mt-1">Simulation du taux d'intérêt basé sur le risque</p>
-            </div>
-            <Link
-              href="/projects"
-              className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition"
-            >
-              ← Retour
-            </Link>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Calculateur de Taux</h1>
+            <p className="text-slate-400">Simulation du taux d'intérêt basé sur le profil de risque</p>
           </div>
+          <Link
+            href="/analyses"
+            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+          >
+            ← Retour
+          </Link>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Form */}
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-            <h2 className="text-xl font-bold text-white mb-6">Paramètres du Projet</h2>
+          <div className="lg:col-span-4 space-y-6">
+            <GlassCard className="p-6">
+              <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                <span className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm">⚙️</span>
+                Paramètres
+              </h2>
 
-            <div className="space-y-6">
-              {/* City */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Ville
-                </label>
-                <select
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                >
-                  <option value="Paris">Paris</option>
-                  <option value="Lyon">Lyon</option>
-                  <option value="Marseille">Marseille</option>
-                  <option value="Bordeaux">Bordeaux</option>
-                  <option value="Toulouse">Toulouse</option>
-                  <option value="Nice">Nice</option>
-                </select>
-              </div>
-
-              {/* LTV */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  LTV (Loan-to-Value) - {ltv}%
-                </label>
-                <input
-                  type="range"
-                  min="40"
-                  max="90"
-                  step="5"
-                  value={ltv}
-                  onChange={(e) => setLtv(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>40%</span>
-                  <span>90%</span>
+              <div className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Ville</label>
+                  <select
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg glass-input text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none bg-no-repeat bg-[right_1rem_center]"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")` }}
+                  >
+                    <option value="Paris" className="bg-slate-900">Paris</option>
+                    <option value="Lyon" className="bg-slate-900">Lyon</option>
+                    <option value="Marseille" className="bg-slate-900">Marseille</option>
+                    <option value="Bordeaux" className="bg-slate-900">Bordeaux</option>
+                    <option value="Toulouse" className="bg-slate-900">Toulouse</option>
+                    <option value="Nice" className="bg-slate-900">Nice</option>
+                  </select>
                 </div>
-              </div>
 
-              {/* TRI */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  TRI Cible - {tri}%
-                </label>
-                <input
-                  type="range"
-                  min="5"
-                  max="20"
-                  step="0.5"
-                  value={tri}
-                  onChange={(e) => setTri(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                />
-                <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span>5%</span>
-                  <span>20%</span>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm font-medium text-slate-300">LTV (Loan-to-Value)</label>
+                    <span className="text-sm font-bold text-blue-400">{ltv}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="40"
+                    max="90"
+                    step="5"
+                    value={ltv}
+                    onChange={(e) => setLtv(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  />
                 </div>
-              </div>
 
-              {/* Showstoppers */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Nombre de Showstoppers Critiques
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="10"
-                  value={showstoppers}
-                  onChange={(e) => setShowstoppers(Number(e.target.value))}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                />
-              </div>
+                <div>
+                  <div className="flex justify-between mb-2">
+                    <label className="text-sm font-medium text-slate-300">TRI Cible</label>
+                    <span className="text-sm font-bold text-emerald-400">{tri}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="5"
+                    max="20"
+                    step="0.5"
+                    value={tri}
+                    onChange={(e) => setTri(Number(e.target.value))}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+                  />
+                </div>
 
-              {/* Experience */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Expérience Promoteur
-                </label>
-                <select
-                  value={experience}
-                  onChange={(e) => setExperience(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Points Bloquants</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="10"
+                    value={showstoppers}
+                    onChange={(e) => setShowstoppers(Number(e.target.value))}
+                    className="w-full px-4 py-2.5 rounded-lg glass-input text-white"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Expérience</label>
+                  <select
+                    value={experience}
+                    onChange={(e) => setExperience(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg glass-input text-white appearance-none bg-no-repeat bg-[right_1rem_center]"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")` }}
+                  >
+                    <option value="beginner" className="bg-slate-900">Débutant (&lt; 2 projets)</option>
+                    <option value="intermediate" className="bg-slate-900">Intermédiaire (2-5 projets)</option>
+                    <option value="expert" className="bg-slate-900">Expert (&gt; 5 projets)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Type de Projet</label>
+                  <select
+                    value={projectType}
+                    onChange={(e) => setProjectType(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg glass-input text-white appearance-none bg-no-repeat bg-[right_1rem_center]"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")` }}
+                  >
+                    <option value="rehabilitation_legere" className="bg-slate-900">Réhabilitation Légère</option>
+                    <option value="restructuration_lourde" className="bg-slate-900">Restructuration Lourde</option>
+                    <option value="construction_neuve" className="bg-slate-900">Construction Neuve</option>
+                    <option value="marchand_de_biens" className="bg-slate-900">Marchand de Biens</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Complexité</label>
+                  <select
+                    value={complexity}
+                    onChange={(e) => setComplexity(e.target.value)}
+                    className="w-full px-4 py-2.5 rounded-lg glass-input text-white appearance-none bg-no-repeat bg-[right_1rem_center]"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2394a3b8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")` }}
+                  >
+                    <option value="simple" className="bg-slate-900">Simple</option>
+                    <option value="moderate" className="bg-slate-900">Modérée</option>
+                    <option value="complex" className="bg-slate-900">Complexe</option>
+                    <option value="very_complex" className="bg-slate-900">Très Complexe</option>
+                  </select>
+                </div>
+
+                <button
+                  onClick={calculateInterestRate}
+                  disabled={loading}
+                  className="w-full px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white font-medium shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
-                  <option value="beginner">Débutant (&lt; 2 projets)</option>
-                  <option value="intermediate">Intermédiaire (2-5 projets)</option>
-                  <option value="expert">Expert (&gt; 5 projets)</option>
-                </select>
+                  {loading ? 'Calcul en cours...' : 'Recalculer'}
+                </button>
               </div>
-
-              {/* Project Type */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Type de Projet
-                </label>
-                <select
-                  value={projectType}
-                  onChange={(e) => setProjectType(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                >
-                  <option value="rehabilitation_legere">Réhabilitation Légère</option>
-                  <option value="restructuration_lourde">Restructuration Lourde</option>
-                  <option value="construction_neuve">Construction Neuve</option>
-                  <option value="marchand_de_biens">Marchand de Biens</option>
-                </select>
-              </div>
-
-              {/* Complexity */}
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Complexité Administrative
-                </label>
-                <select
-                  value={complexity}
-                  onChange={(e) => setComplexity(e.target.value)}
-                  className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                >
-                  <option value="simple">Simple (DP, pas d'ABF)</option>
-                  <option value="moderate">Modérée (PC standard)</option>
-                  <option value="complex">Complexe (PC + ABF)</option>
-                  <option value="very_complex">Très Complexe (PC + ABF + Périmètre protégé)</option>
-                </select>
-              </div>
-
-              <button
-                onClick={calculateInterestRate}
-                disabled={loading}
-                className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-              >
-                {loading ? 'Calcul en cours...' : 'Calculer le Taux'}
-              </button>
-            </div>
+            </GlassCard>
           </div>
 
           {/* Results */}
-          {result && (
-            <div className="space-y-6">
-              {/* Main Result Card */}
-              <div className={`rounded-lg border p-6 ${getCategoryBg(result.category)}`}>
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-white">Taux Final</h3>
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${getCategoryColor(result.category)}`}>
-                    {result.category}
-                  </span>
-                </div>
-                <div className="text-5xl font-bold text-white mb-2">
-                  {result.final_rate.toFixed(2)}%
-                </div>
-                <div className="text-gray-400 text-sm">
-                  Euribor {result.euribor_rate.toFixed(2)}% + Marge {result.margin.toFixed(2)}%
-                </div>
-              </div>
-
-              {/* Risk Score */}
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Score de Risque</h3>
-                
-                {/* Gauge */}
-                <div className="relative mb-6">
-                  <div className="h-4 bg-gray-800 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full transition-all duration-500 ${
-                        result.risk_score >= 80 ? 'bg-green-500' :
-                        result.risk_score >= 60 ? 'bg-blue-500' :
-                        result.risk_score >= 40 ? 'bg-yellow-500' :
-                        'bg-red-500'
-                      }`}
-                      style={{ width: `${result.risk_score}%` }}
-                    ></div>
-                  </div>
-                  <div className="flex justify-between text-xs text-gray-500 mt-1">
-                    <span>0</span>
-                    <span>100</span>
-                  </div>
-                  <div className="text-center mt-2">
-                    <span className="text-3xl font-bold text-white">{result.risk_score}</span>
-                    <span className="text-gray-400">/100</span>
-                  </div>
-                </div>
-
-                {/* Factors Breakdown */}
-                <div className="space-y-3">
-                  <h4 className="text-sm font-medium text-gray-400 uppercase">Détail des Facteurs</h4>
-                  {result.factors.map((factor, index) => (
-                    <div key={index} className="bg-gray-800 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <div className="flex items-center space-x-2">
-                          <span className="text-white font-medium">{factor.name}</span>
-                          <span className="text-xs text-gray-500">×{factor.weight}%</span>
-                        </div>
-                        <span className={`text-sm font-bold ${
-                          factor.score >= 80 ? 'text-green-400' :
-                          factor.score >= 60 ? 'text-blue-400' :
-                          factor.score >= 40 ? 'text-yellow-400' :
-                          'text-red-400'
-                        }`}>
-                          {factor.score}
-                        </span>
+          <div className="lg:col-span-8 space-y-6">
+            {result && (
+              <>
+                <GlassCard className={`p-8 relative overflow-hidden ${getCategoryColor(result.category).split(' ')[1]}`}>
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl -mr-32 -mt-32"></div>
+                  
+                  <div className="flex items-center justify-between mb-8 relative z-10">
+                    <div>
+                      <h2 className="text-sm font-medium text-slate-300 uppercase tracking-widest mb-1">Taux estimé</h2>
+                      <div className="text-6xl font-bold text-white tracking-tight">
+                        {result.final_rate.toFixed(2)}<span className="text-3xl text-slate-400 font-normal">%</span>
                       </div>
-                      <div className="h-2 bg-gray-900 rounded-full overflow-hidden">
-                        <div
-                          className={`h-full ${
-                            factor.score >= 80 ? 'bg-green-500' :
-                            factor.score >= 60 ? 'bg-blue-500' :
-                            factor.score >= 40 ? 'bg-yellow-500' :
-                            'bg-red-500'
-                          }`}
-                          style={{ width: `${factor.score}%` }}
-                        ></div>
-                      </div>
-                      <p className="text-xs text-gray-400 mt-1">{factor.description}</p>
                     </div>
-                  ))}
+                    <div className={`px-4 py-2 rounded-xl border text-sm font-bold uppercase tracking-wider ${getCategoryColor(result.category)}`}>
+                      {result.category}
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-8 relative z-10">
+                    <div className="px-4 py-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/5">
+                      <span className="block text-xs text-slate-400 mb-1">Euribor</span>
+                      <span className="text-lg font-semibold text-white">{result.euribor_rate.toFixed(2)}%</span>
+                    </div>
+                    <div className="text-slate-500">+</div>
+                    <div className="px-4 py-3 rounded-lg bg-black/20 backdrop-blur-sm border border-white/5">
+                      <span className="block text-xs text-slate-400 mb-1">Marge de Risque</span>
+                      <span className="text-lg font-semibold text-white">{result.margin.toFixed(2)}%</span>
+                    </div>
+                  </div>
+                </GlassCard>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Risk Score */}
+                  <GlassCard className="p-6">
+                    <h3 className="text-lg font-semibold text-white mb-6">Score de Risque</h3>
+                    
+                    <div className="relative mb-8 pt-4">
+                      <div className="h-4 bg-slate-800 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full transition-all duration-1000 ease-out ${getRiskScoreColor(result.risk_score)}`}
+                          style={{ width: `${result.risk_score}%` }}
+                        />
+                      </div>
+                      <div className="absolute top-0 right-0 -mt-8">
+                         <span className={`text-2xl font-bold ${getRiskTextColor(result.risk_score)}`}>{result.risk_score}</span>
+                         <span className="text-slate-500 text-sm">/100</span>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Détail des facteurs</p>
+                      {result.factors.map((factor, index) => (
+                        <div key={index} className="group">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-sm text-slate-300">{factor.name}</span>
+                            <span className={`text-sm font-medium ${getRiskTextColor(factor.score)}`}>{factor.score}</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                             <div 
+                                className={`h-full ${getRiskScoreColor(factor.score)} opacity-50 group-hover:opacity-100 transition-opacity`}
+                                style={{ width: `${factor.score}%` }}
+                             />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </GlassCard>
+
+                  {/* Recommendations */}
+                  <GlassCard className="p-6">
+                    <h3 className="text-lg font-semibold text-white mb-6">Recommandations</h3>
+                    <ul className="space-y-4">
+                      {result.category === 'Risqué' && (
+                        <>
+                          <li className="flex gap-3 text-sm text-slate-300">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center">!</span>
+                            Envisager de réduire le LTV pour améliorer le profil de risque.
+                          </li>
+                          <li className="flex gap-3 text-sm text-slate-300">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-red-500/20 text-red-400 flex items-center justify-center">!</span>
+                            Résoudre les showstoppers critiques avant financement.
+                          </li>
+                        </>
+                      )}
+                      
+                       {(result.category === 'Bon' || result.category === 'Excellent') && (
+                        <>
+                          <li className="flex gap-3 text-sm text-slate-300">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">✓</span>
+                            Profil favorable pour négocier avec plusieurs banques.
+                          </li>
+                          <li className="flex gap-3 text-sm text-slate-300">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center">✓</span>
+                            Potentiel de marge de négociation à la baisse (-0.2% à -0.3%).
+                          </li>
+                        </>
+                      )}
+                      
+                      {result.category === 'Moyen' && (
+                         <li className="flex gap-3 text-sm text-slate-300">
+                            <span className="flex-shrink-0 w-6 h-6 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center">i</span>
+                            Améliorez la documentation du projet pour rassurer les banquiers.
+                          </li>
+                      )}
+                    </ul>
+                  </GlassCard>
                 </div>
-              </div>
+              </>
+            )}
 
-              {/* Recommendations */}
-              <div className="bg-gray-900 rounded-lg border border-gray-800 p-6">
-                <h3 className="text-lg font-semibold text-white mb-3">Recommandations</h3>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  {result.category === 'Risqué' && (
-                    <>
-                      <li className="flex items-start">
-                        <span className="text-red-400 mr-2">•</span>
-                        Envisager de réduire le LTV pour améliorer le profil de risque
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-red-400 mr-2">•</span>
-                        Résoudre les showstoppers critiques avant financement
-                      </li>
-                    </>
-                  )}
-                  {result.category === 'Moyen' && (
-                    <>
-                      <li className="flex items-start">
-                        <span className="text-yellow-400 mr-2">•</span>
-                        Prévoir une marge de sécurité supplémentaire
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-yellow-400 mr-2">•</span>
-                        Documenter soigneusement le projet pour les banques
-                      </li>
-                    </>
-                  )}
-                  {(result.category === 'Bon' || result.category === 'Excellent') && (
-                    <>
-                      <li className="flex items-start">
-                        <span className="text-green-400 mr-2">•</span>
-                        Profil favorable pour négocier avec plusieurs banques
-                      </li>
-                      <li className="flex items-start">
-                        <span className="text-green-400 mr-2">•</span>
-                        Potentiel de marge de négociation à la baisse
-                      </li>
-                    </>
-                  )}
-                </ul>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3 text-red-400">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                {error}
               </div>
-            </div>
-          )}
-
-          {/* Error Display */}
-          {error && (
-            <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
-              <p className="text-yellow-400 text-sm">⚠️ {error}</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </DashboardLayout>

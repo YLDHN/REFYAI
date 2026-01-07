@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useShowstoppers } from '@/lib/hooks';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface Showstopper {
   category: string;
@@ -37,9 +39,7 @@ export default function ShowstoppersPage() {
   const loadShowstoppers = async () => {
     setLoading(true);
     try {
-      // Appel API backend pour détecter showstoppers
-      // Pour le moment, on utilise mock data car on a besoin de données de projet
-      // TODO: Passer les vraies données du projet actif
+      // Mock data remains same as before until real backend hookup
       const mockShowstoppers: Showstopper[] = [
         {
           category: 'regulatory',
@@ -81,7 +81,6 @@ export default function ShowstoppersPage() {
 
       setShowstoppers(mockShowstoppers);
 
-      // Générer plan d'action
       const mockPlan: ActionPlanItem[] = mockShowstoppers.map((s, i) => ({
         priority: i + 1,
         showstopper: s,
@@ -98,18 +97,18 @@ export default function ShowstoppersPage() {
     }
   };
 
-  const getSeverityColor = (severity: string) => {
+  const getSeverityStyle = (severity: string) => {
     switch (severity) {
       case 'CRITICAL':
-        return 'bg-red-500/10 text-red-400 border-red-500/30';
+        return 'bg-red-500/10 border-red-500/30 text-red-400';
       case 'HIGH':
-        return 'bg-orange-500/10 text-orange-400 border-orange-500/30';
+        return 'bg-orange-500/10 border-orange-500/30 text-orange-400';
       case 'MEDIUM':
-        return 'bg-yellow-500/10 text-yellow-400 border-yellow-500/30';
+        return 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400';
       case 'LOW':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/30';
+        return 'bg-blue-500/10 border-blue-500/30 text-blue-400';
       default:
-        return 'bg-gray-500/10 text-gray-400 border-gray-500/30';
+        return 'bg-slate-500/10 border-slate-500/30 text-slate-400';
     }
   };
 
@@ -123,207 +122,166 @@ export default function ShowstoppersPage() {
     return labels[severity as keyof typeof labels] || severity;
   };
 
-  const getCategoryLabel = (category: string) => {
-    const labels = {
-      regulatory: 'Réglementaire',
-      technical: 'Technique',
-      financial: 'Financier',
-      legal: 'Juridique'
-    };
-    return labels[category as keyof typeof labels] || category;
-  };
-
   const totalCost = actionPlan.reduce((sum, item) => sum + item.estimated_cost, 0);
   const criticalCount = showstoppers.filter(s => s.severity === 'CRITICAL').length;
   const highCount = showstoppers.filter(s => s.severity === 'HIGH').length;
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-white">Points Bloquants</h1>
-              <p className="text-gray-400 mt-1">Analyse des showstoppers du projet</p>
-            </div>
-            <Link
-              href="/projects"
-              className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition"
-            >
-              ← Retour
-            </Link>
+    <DashboardLayout>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Points Bloquants</h1>
+            <p className="text-slate-400">Analyse des risques et showstoppers du projet</p>
           </div>
+          <Link
+            href="/analyses"
+            className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium"
+          >
+            ← Retour
+          </Link>
         </div>
-      </div>
 
-      {/* Stats */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-4 gap-4">
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-            <div className="text-gray-400 text-sm">Total</div>
-            <div className="text-3xl font-bold text-white mt-1">{showstoppers.length}</div>
-          </div>
-          <div className="bg-red-500/10 rounded-lg border border-red-500/30 p-4">
-            <div className="text-red-400 text-sm">Critiques</div>
-            <div className="text-3xl font-bold text-red-400 mt-1">{criticalCount}</div>
-          </div>
-          <div className="bg-orange-500/10 rounded-lg border border-orange-500/30 p-4">
-            <div className="text-orange-400 text-sm">Élevés</div>
-            <div className="text-3xl font-bold text-orange-400 mt-1">{highCount}</div>
-          </div>
-          <div className="bg-gray-900 rounded-lg border border-gray-800 p-4">
-            <div className="text-gray-400 text-sm">Coût estimé</div>
-            <div className="text-2xl font-bold text-white mt-1">
-              {(totalCost / 1000).toFixed(0)}k€
-            </div>
-          </div>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <GlassCard className="p-4">
+            <p className="text-slate-400 text-sm mb-1">Total Détecté</p>
+            <p className="text-2xl font-bold text-white">{showstoppers.length}</p>
+          </GlassCard>
+          <GlassCard className="p-4 bg-red-500/5 border-red-500/20">
+            <p className="text-red-400 text-sm mb-1">Critiques</p>
+            <p className="text-2xl font-bold text-white">{criticalCount}</p>
+          </GlassCard>
+           <GlassCard className="p-4 bg-orange-500/5 border-orange-500/20">
+            <p className="text-orange-400 text-sm mb-1">Élevés</p>
+            <p className="text-2xl font-bold text-white">{highCount}</p>
+          </GlassCard>
+          <GlassCard className="p-4">
+            <p className="text-slate-400 text-sm mb-1">Coût Estimé</p>
+            <p className="text-2xl font-bold text-white">{(totalCost / 1000).toFixed(0)}k€</p>
+          </GlassCard>
         </div>
-      </div>
 
-      {/* Tabs */}
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="border-b border-gray-800">
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab('list')}
-              className={`pb-3 px-1 border-b-2 transition ${
-                activeTab === 'list'
-                  ? 'border-blue-600 text-white'
-                  : 'border-transparent text-gray-400 hover:text-white'
-              }`}
-            >
-              Liste des Showstoppers
-            </button>
-            <button
-              onClick={() => setActiveTab('plan')}
-              className={`pb-3 px-1 border-b-2 transition ${
-                activeTab === 'plan'
-                  ? 'border-blue-600 text-white'
-                  : 'border-transparent text-gray-400 hover:text-white'
-              }`}
-            >
-              Plan d'Action
-            </button>
-          </div>
+        {/* Tabs */}
+        <div className="flex space-x-2 border-b border-white/10 pb-1">
+          <button
+            onClick={() => setActiveTab('list')}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+              activeTab === 'list' 
+                ? 'bg-blue-500/20 text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Liste des Risques
+          </button>
+          <button
+            onClick={() => setActiveTab('plan')}
+             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 ${
+              activeTab === 'plan' 
+                ? 'bg-blue-500/20 text-blue-300 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                : 'text-slate-400 hover:text-white hover:bg-white/5'
+            }`}
+          >
+            Plan d'Action
+          </button>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
+        {/* Content */}
         {activeTab === 'list' && (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4">
             {showstoppers.map((showstopper, index) => (
-              <div
-                key={index}
-                className={`rounded-lg border p-6 ${getSeverityColor(showstopper.severity)}`}
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <span className="px-3 py-1 bg-gray-900 rounded-full text-sm">
-                      {getCategoryLabel(showstopper.category)}
-                    </span>
-                    <span className="px-3 py-1 bg-gray-900 rounded-full text-sm font-semibold">
-                      {getSeverityBadge(showstopper.severity)}
-                    </span>
-                  </div>
+              <GlassCard key={index} className={`p-6 border-l-4 ${
+                  showstopper.severity === 'CRITICAL' ? 'border-l-red-500' : 
+                  showstopper.severity === 'HIGH' ? 'border-l-orange-500' : 
+                  'border-l-yellow-500'
+              }`}>
+                <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+                    <div>
+                        <div className="flex items-center gap-3 mb-2">
+                             <span className={`px-2.5 py-0.5 rounded-full text-xs font-medium border ${getSeverityStyle(showstopper.severity)}`}>
+                                {getSeverityBadge(showstopper.severity)}
+                             </span>
+                            <span className="text-sm text-slate-400 uppercase tracking-wider">{showstopper.category}</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-white">{showstopper.description}</h3>
+                    </div>
                 </div>
 
-                <h3 className="text-xl font-semibold text-white mb-2">
-                  {showstopper.description}
-                </h3>
-
-                <div className="space-y-3 text-gray-300">
-                  <div>
-                    <span className="font-medium">Impact:</span> {showstopper.impact}
-                  </div>
-                  <div>
-                    <span className="font-medium">Recommandation:</span> {showstopper.recommendation}
-                  </div>
-                  {showstopper.estimated_cost && (
-                    <div>
-                      <span className="font-medium">Coût estimé:</span>{' '}
-                      {(showstopper.estimated_cost / 1000).toFixed(0)}k€
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
+                    <div className="space-y-2">
+                         <div className="flex gap-2">
+                            <span className="text-slate-400 w-24 flex-shrink-0">Impact:</span>
+                            <span className="text-slate-200">{showstopper.impact}</span>
+                         </div>
+                         <div className="flex gap-2">
+                            <span className="text-slate-400 w-24 flex-shrink-0">Recommandation:</span>
+                            <span className="text-emerald-400">{showstopper.recommendation}</span>
+                         </div>
                     </div>
-                  )}
-                  {showstopper.estimated_delay_days && (
-                    <div>
-                      <span className="font-medium">Délai estimé:</span>{' '}
-                      {Math.floor(showstopper.estimated_delay_days / 30)} mois
+                    <div className="space-y-2">
+                        {showstopper.estimated_cost && (
+                             <div className="flex gap-2">
+                                <span className="text-slate-400 w-24 flex-shrink-0">Coût estimé:</span>
+                                <span className="text-white font-medium">{(showstopper.estimated_cost / 1000).toFixed(0)}k€</span>
+                             </div>
+                        )}
+                         {showstopper.estimated_delay_days && (
+                             <div className="flex gap-2">
+                                <span className="text-slate-400 w-24 flex-shrink-0">Délai estimé:</span>
+                                <span className="text-white font-medium">{Math.floor(showstopper.estimated_delay_days / 30)} mois</span>
+                             </div>
+                        )}
                     </div>
-                  )}
                 </div>
-              </div>
+              </GlassCard>
             ))}
           </div>
         )}
 
         {activeTab === 'plan' && (
-          <div className="bg-gray-900 rounded-lg border border-gray-800">
-            <div className="p-6 border-b border-gray-800">
-              <h2 className="text-xl font-bold text-white">Plan d'Action Priorisé</h2>
-              <p className="text-gray-400 mt-1">Actions à entreprendre par ordre de priorité</p>
-            </div>
-
-            <div className="divide-y divide-gray-800">
-              {actionPlan.map((item) => (
-                <div key={item.priority} className="p-6 hover:bg-gray-800/50 transition">
-                  <div className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center font-bold text-white">
-                      {item.priority}
-                    </div>
-
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-2">
-                        <h3 className="text-lg font-semibold text-white">
-                          {item.showstopper.description}
-                        </h3>
-                        <span className={`px-3 py-1 rounded-full text-sm ${getSeverityColor(item.showstopper.severity)}`}>
-                          {getSeverityBadge(item.showstopper.severity)}
-                        </span>
-                      </div>
-
-                      <p className="text-gray-400 mb-3">{item.action}</p>
-
-                      <div className="flex items-center space-x-6 text-sm">
-                        <div className="flex items-center space-x-2">
-                          <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                          </svg>
-                          <span className="text-gray-400">{item.timeline}</span>
+          <GlassCard className="overflow-hidden">
+             <div className="p-6 border-b border-white/10">
+                <h2 className="text-lg font-semibold text-white">Actions Recommandées</h2>
+                <p className="text-slate-400 text-sm mt-1">Plan priorisé pour débloquer le projet</p>
+             </div>
+             
+             <div className="divide-y divide-white/5">
+                {actionPlan.map((item) => (
+                    <div key={item.priority} className="p-6 hover:bg-white/5 transition-colors group">
+                        <div className="flex items-start gap-4">
+                            <div className="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center font-bold text-lg border border-blue-500/10 flex-shrink-0">
+                                {item.priority}
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center justify-between mb-2">
+                                    <h3 className="text-white font-medium text-lg">{item.action}</h3>
+                                     <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getSeverityStyle(item.showstopper.severity)}`}>
+                                        {getSeverityBadge(item.showstopper.severity)}
+                                     </span>
+                                </div>
+                                <p className="text-slate-400 text-sm mb-3">Pour résoudre : <span className="text-slate-300 italic">{item.showstopper.description}</span></p>
+                                
+                                <div className="flex items-center gap-6 text-sm">
+                                    <div className="flex items-center gap-2 text-slate-500">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                        {item.timeline}
+                                    </div>
+                                    {item.estimated_cost > 0 && (
+                                        <div className="flex items-center gap-2 text-slate-500">
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                            {(item.estimated_cost / 1000).toFixed(0)}k€
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        {item.estimated_cost > 0 && (
-                          <div className="flex items-center space-x-2">
-                            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span className="text-gray-400">
-                              {(item.estimated_cost / 1000).toFixed(0)}k€
-                            </span>
-                          </div>
-                        )}
-                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            <div className="p-6 bg-gray-800/50 border-t border-gray-800">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="text-gray-400 text-sm">Coût total estimé</div>
-                  <div className="text-2xl font-bold text-white">{(totalCost / 1000).toFixed(0)}k€</div>
-                </div>
-                <div>
-                  <div className="text-gray-400 text-sm">Durée estimée</div>
-                  <div className="text-2xl font-bold text-white">6-12 mois</div>
-                </div>
-              </div>
-            </div>
-          </div>
+                ))}
+             </div>
+          </GlassCard>
         )}
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

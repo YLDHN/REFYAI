@@ -39,7 +39,7 @@ export function useAuth() {
 }
 
 export function useProjects() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

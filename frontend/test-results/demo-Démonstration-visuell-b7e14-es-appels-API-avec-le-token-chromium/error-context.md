@@ -3,129 +3,138 @@
 ```yaml
 - generic [active] [ref=e1]:
   - alert [ref=e2]
-  - generic [ref=e4]:
-    - generic [ref=e5]:
-      - generic [ref=e6]:
-        - heading "Dashboard" [level=1] [ref=e7]
-        - paragraph [ref=e8]: Vue d'ensemble de vos projets immobiliers
-      - generic [ref=e9]:
-        - generic [ref=e10]:
-          - img [ref=e11]
-          - generic [ref=e14]: demo@refyai.com
-        - button "Déconnexion" [ref=e15] [cursor=pointer]:
-          - img [ref=e16]
-          - text: Déconnexion
-        - button "Nouveau Projet" [ref=e19] [cursor=pointer]:
-          - img [ref=e20]
-          - text: Nouveau Projet
-    - generic [ref=e21]:
-      - generic [ref=e24]:
-        - generic [ref=e25]:
-          - paragraph [ref=e26]: Projets Totaux
-          - paragraph [ref=e27]: "5"
-        - img [ref=e29]
-      - generic [ref=e34]:
-        - generic [ref=e35]:
-          - paragraph [ref=e36]: En Cours
-          - paragraph [ref=e37]: "0"
-        - img [ref=e39]
-      - generic [ref=e43]:
-        - generic [ref=e44]:
-          - paragraph [ref=e45]: TRI Moyen
-          - paragraph [ref=e46]: 0.0%
-        - img [ref=e48]
-      - generic [ref=e53]:
-        - generic [ref=e54]:
-          - paragraph [ref=e55]: Investissement Total
-          - paragraph [ref=e56]: 0.0M€
-        - img [ref=e58]
-    - generic [ref=e61]:
-      - heading "Tous les Projets" [level=3] [ref=e63]
-      - table [ref=e66]:
-        - rowgroup [ref=e67]:
-          - row "Nom du Projet Adresse Ville Type Surface (m²) Prix TRI Score Technique Statut" [ref=e68]:
-            - columnheader "Nom du Projet" [ref=e69] [cursor=pointer]:
-              - generic [ref=e70]: Nom du Projet
-            - columnheader "Adresse" [ref=e71] [cursor=pointer]:
-              - generic [ref=e72]: Adresse
-            - columnheader "Ville" [ref=e73] [cursor=pointer]:
-              - generic [ref=e74]: Ville
-            - columnheader "Type" [ref=e75] [cursor=pointer]:
-              - generic [ref=e76]: Type
-            - columnheader "Surface (m²)" [ref=e77] [cursor=pointer]:
-              - generic [ref=e78]: Surface (m²)
-            - columnheader "Prix" [ref=e79] [cursor=pointer]:
-              - generic [ref=e80]: Prix
-            - columnheader "TRI" [ref=e81] [cursor=pointer]:
-              - generic [ref=e82]: TRI
-            - columnheader "Score Technique" [ref=e83] [cursor=pointer]:
-              - generic [ref=e84]: Score Technique
-            - columnheader "Statut" [ref=e85] [cursor=pointer]:
-              - generic [ref=e86]: Statut
-        - rowgroup [ref=e87]:
-          - row "Test 5 Avenue du Colonel Bonnet Paris - - - - - draft" [ref=e88] [cursor=pointer]:
-            - cell "Test" [ref=e89]:
-              - link "Test" [ref=e90]:
-                - /url: /projects/1
-            - cell "5 Avenue du Colonel Bonnet" [ref=e91]
-            - cell "Paris" [ref=e92]
-            - cell "-" [ref=e93]
-            - cell "-" [ref=e94]
-            - cell "-" [ref=e95]
-            - cell "-" [ref=e96]
-            - cell "-" [ref=e97]
-            - cell "draft" [ref=e98]:
-              - generic [ref=e99]: draft
-          - row "Mon Projet Test Visual 5 Avenue du Colonel Bonnet Paris - - - - - draft" [ref=e100] [cursor=pointer]:
-            - cell "Mon Projet Test Visual" [ref=e101]:
-              - link "Mon Projet Test Visual" [ref=e102]:
-                - /url: /projects/2
-            - cell "5 Avenue du Colonel Bonnet" [ref=e103]
-            - cell "Paris" [ref=e104]
-            - cell "-" [ref=e105]
-            - cell "-" [ref=e106]
-            - cell "-" [ref=e107]
-            - cell "-" [ref=e108]
-            - cell "-" [ref=e109]
-            - cell "draft" [ref=e110]:
-              - generic [ref=e111]: draft
-          - row "Projet Complet Test 10 Rue de la Paix Lyon - - - - - draft" [ref=e112] [cursor=pointer]:
-            - cell "Projet Complet Test" [ref=e113]:
-              - link "Projet Complet Test" [ref=e114]:
-                - /url: /projects/3
-            - cell "10 Rue de la Paix" [ref=e115]
-            - cell "Lyon" [ref=e116]
-            - cell "-" [ref=e117]
-            - cell "-" [ref=e118]
-            - cell "-" [ref=e119]
-            - cell "-" [ref=e120]
-            - cell "-" [ref=e121]
-            - cell "draft" [ref=e122]:
-              - generic [ref=e123]: draft
-          - row "Projet Complet Test 10 Rue de la Paix Lyon - - - - - draft" [ref=e124] [cursor=pointer]:
-            - cell "Projet Complet Test" [ref=e125]:
-              - link "Projet Complet Test" [ref=e126]:
-                - /url: /projects/12
-            - cell "10 Rue de la Paix" [ref=e127]
-            - cell "Lyon" [ref=e128]
-            - cell "-" [ref=e129]
-            - cell "-" [ref=e130]
-            - cell "-" [ref=e131]
-            - cell "-" [ref=e132]
-            - cell "-" [ref=e133]
-            - cell "draft" [ref=e134]:
-              - generic [ref=e135]: draft
-          - row "Projet Complet Test 10 Rue de la Paix Lyon - - - - - draft" [ref=e136] [cursor=pointer]:
-            - cell "Projet Complet Test" [ref=e137]:
-              - link "Projet Complet Test" [ref=e138]:
-                - /url: /projects/21
-            - cell "10 Rue de la Paix" [ref=e139]
-            - cell "Lyon" [ref=e140]
-            - cell "-" [ref=e141]
-            - cell "-" [ref=e142]
-            - cell "-" [ref=e143]
-            - cell "-" [ref=e144]
-            - cell "-" [ref=e145]
-            - cell "draft" [ref=e146]:
-              - generic [ref=e147]: draft
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - generic [ref=e9]: R
+            - heading "REFY AI" [level=1] [ref=e10]
+          - paragraph [ref=e11]: Analyse Immobilière Intelligente
+        - navigation [ref=e12]:
+          - link "Dashboard" [ref=e13] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e15]
+            - generic [ref=e17]: Dashboard
+          - link "Projets" [ref=e18] [cursor=pointer]:
+            - /url: /projects
+            - img [ref=e19]
+            - generic [ref=e21]: Projets
+          - link "Analyses" [ref=e22] [cursor=pointer]:
+            - /url: /analyses
+            - img [ref=e23]
+            - generic [ref=e25]: Analyses
+          - link "Documents" [ref=e26] [cursor=pointer]:
+            - /url: /documents
+            - img [ref=e27]
+            - generic [ref=e29]: Documents
+          - link "Chat IA" [ref=e30] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e31]
+            - generic [ref=e33]: Chat IA
+        - generic [ref=e35] [cursor=pointer]:
+          - generic [ref=e36]: U
+          - generic [ref=e37]:
+            - paragraph [ref=e38]: Utilisateur
+            - paragraph [ref=e39]: user@refy.ai
+    - main [ref=e40]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - heading "Dashboard" [level=1] [ref=e45]
+            - paragraph [ref=e46]: Vue d'ensemble de vos projets immobiliers
+          - generic [ref=e47]:
+            - generic [ref=e48]:
+              - img [ref=e49]
+              - generic [ref=e52]: demo@refyai.com
+            - button "Déconnexion" [ref=e53] [cursor=pointer]:
+              - img [ref=e54]
+              - text: Déconnexion
+            - button "Nouveau Projet" [ref=e57] [cursor=pointer]:
+              - img [ref=e58]
+              - text: Nouveau Projet
+        - generic [ref=e59]:
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - paragraph [ref=e63]: Projets Totaux
+              - paragraph [ref=e64]: "3"
+            - img [ref=e66]
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - paragraph [ref=e72]: En Cours
+              - paragraph [ref=e73]: "0"
+            - img [ref=e75]
+          - generic [ref=e78]:
+            - generic [ref=e79]:
+              - paragraph [ref=e80]: TRI Moyen
+              - paragraph [ref=e81]: 0.0%
+            - img [ref=e83]
+          - generic [ref=e87]:
+            - generic [ref=e88]:
+              - paragraph [ref=e89]: Investissement Total
+              - paragraph [ref=e90]: 0.0M€
+            - img [ref=e92]
+        - generic [ref=e95]:
+          - heading "Tous les Projets" [level=2] [ref=e97]
+          - table [ref=e100]:
+            - rowgroup [ref=e101]:
+              - row "Nom du Projet Adresse Ville Type Surface (m²) Prix TRI Score Technique Statut" [ref=e102]:
+                - columnheader "Nom du Projet" [ref=e103] [cursor=pointer]:
+                  - generic [ref=e104]: Nom du Projet
+                - columnheader "Adresse" [ref=e105] [cursor=pointer]:
+                  - generic [ref=e106]: Adresse
+                - columnheader "Ville" [ref=e107] [cursor=pointer]:
+                  - generic [ref=e108]: Ville
+                - columnheader "Type" [ref=e109] [cursor=pointer]:
+                  - generic [ref=e110]: Type
+                - columnheader "Surface (m²)" [ref=e111] [cursor=pointer]:
+                  - generic [ref=e112]: Surface (m²)
+                - columnheader "Prix" [ref=e113] [cursor=pointer]:
+                  - generic [ref=e114]: Prix
+                - columnheader "TRI" [ref=e115] [cursor=pointer]:
+                  - generic [ref=e116]: TRI
+                - columnheader "Score Technique" [ref=e117] [cursor=pointer]:
+                  - generic [ref=e118]: Score Technique
+                - columnheader "Statut" [ref=e119] [cursor=pointer]:
+                  - generic [ref=e120]: Statut
+            - rowgroup [ref=e121]:
+              - row "Tour de Bureaux - La Défense 1 Parvis de La Défense Puteaux - - - - - in_progress" [ref=e122] [cursor=pointer]:
+                - cell "Tour de Bureaux - La Défense" [ref=e123]:
+                  - link "Tour de Bureaux - La Défense" [ref=e124]:
+                    - /url: /projects/1
+                - cell "1 Parvis de La Défense" [ref=e125]
+                - cell "Puteaux" [ref=e126]
+                - cell "-" [ref=e127]
+                - cell "-" [ref=e128]
+                - cell "-" [ref=e129]
+                - cell "-" [ref=e130]
+                - cell "-" [ref=e131]
+                - cell "in_progress" [ref=e132]:
+                  - generic [ref=e133]: in_progress
+              - row "Résidence Étudiante Lyon Avenue Jean Jaurès Lyon - - - - - completed" [ref=e134] [cursor=pointer]:
+                - cell "Résidence Étudiante Lyon" [ref=e135]:
+                  - link "Résidence Étudiante Lyon" [ref=e136]:
+                    - /url: /projects/2
+                - cell "Avenue Jean Jaurès" [ref=e137]
+                - cell "Lyon" [ref=e138]
+                - cell "-" [ref=e139]
+                - cell "-" [ref=e140]
+                - cell "-" [ref=e141]
+                - cell "-" [ref=e142]
+                - cell "-" [ref=e143]
+                - cell "completed" [ref=e144]:
+                  - generic [ref=e145]: completed
+              - row "Centre Commercial Bordeaux Rue Sainte-Catherine Bordeaux - - - - - in_progress" [ref=e146] [cursor=pointer]:
+                - cell "Centre Commercial Bordeaux" [ref=e147]:
+                  - link "Centre Commercial Bordeaux" [ref=e148]:
+                    - /url: /projects/3
+                - cell "Rue Sainte-Catherine" [ref=e149]
+                - cell "Bordeaux" [ref=e150]
+                - cell "-" [ref=e151]
+                - cell "-" [ref=e152]
+                - cell "-" [ref=e153]
+                - cell "-" [ref=e154]
+                - cell "-" [ref=e155]
+                - cell "in_progress" [ref=e156]:
+                  - generic [ref=e157]: in_progress
 ```

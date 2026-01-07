@@ -3,24 +3,45 @@ services:
   - type: web
     name: refyai-backend
     env: python
+    region: frankfurt
+    plan: free
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      pip install --upgrade pip
+      pip install -r requirements.txt
+      python -m alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT --workers 1
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11
+        value: 3.12.0
       - key: DATABASE_URL
         fromDatabase:
           name: refyai-db
           property: connectionString
       - key: SECRET_KEY
         generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: 10080
       - key: ENVIRONMENT
         value: production
       - key: ALLOWED_ORIGINS
-        value: https://refyai.vercel.app,https://*.vercel.app
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: OPENAI_MODEL
+        value: gpt-4
+      - key: UPLOAD_DIR
+        value: /tmp/uploads
+      - key: MAX_UPLOAD_SIZE
+        value: 52428800
     healthCheckPath: /health
     autoDeploy: true
+    disk:
+      name: refyai-uploads
+      mountPath: /tmp/uploads
+      sizeGB: 1
 
 databases:
   # PostgreSQL Database
@@ -28,3 +49,4 @@ databases:
     databaseName: refyai
     user: refyai
     plan: free
+    region: frankfurt

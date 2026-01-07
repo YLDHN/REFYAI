@@ -1,0 +1,191 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - alert [ref=e2]
+  - generic [ref=e3]:
+    - complementary [ref=e4]:
+      - generic [ref=e5]:
+        - generic [ref=e6]:
+          - generic [ref=e7]:
+            - generic [ref=e9]: R
+            - heading "REFY AI" [level=1] [ref=e10]
+          - paragraph [ref=e11]: Analyse Immobilière Intelligente
+        - navigation [ref=e12]:
+          - link "Dashboard" [ref=e13] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e14]
+            - generic [ref=e16]: Dashboard
+          - link "Projets" [ref=e17] [cursor=pointer]:
+            - /url: /projects
+            - img [ref=e19]
+            - generic [ref=e21]: Projets
+          - link "Analyses" [ref=e22] [cursor=pointer]:
+            - /url: /analyses
+            - img [ref=e23]
+            - generic [ref=e25]: Analyses
+          - link "Documents" [ref=e26] [cursor=pointer]:
+            - /url: /documents
+            - img [ref=e27]
+            - generic [ref=e29]: Documents
+          - link "Chat IA" [ref=e30] [cursor=pointer]:
+            - /url: /chat
+            - img [ref=e31]
+            - generic [ref=e33]: Chat IA
+        - generic [ref=e35] [cursor=pointer]:
+          - generic [ref=e36]: U
+          - generic [ref=e37]:
+            - paragraph [ref=e38]: Utilisateur
+            - paragraph [ref=e39]: user@refy.ai
+    - main [ref=e40]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - heading "Nouveau Projet" [level=1] [ref=e44]
+          - paragraph [ref=e45]: Créez un nouveau projet d'analyse immobilière
+        - generic [ref=e46]:
+          - generic [ref=e47]:
+            - heading "1 Informations générales" [level=2] [ref=e48]:
+              - generic [ref=e49]: "1"
+              - text: Informations générales
+            - generic [ref=e50]:
+              - generic [ref=e51]:
+                - generic [ref=e52]: Nom du projet*
+                - 'textbox "Ex: Immeuble Haussmannien Paris 16" [ref=e53]': Projet Complet Test
+              - generic [ref=e54]:
+                - generic [ref=e55]: Description
+                - textbox "Description du projet..." [ref=e56]: Projet test avec tous les champs remplis
+              - generic [ref=e57]:
+                - generic [ref=e58]:
+                  - generic [ref=e59]: Type de projet*
+                  - combobox [ref=e60]:
+                    - option "Locatif" [selected]
+                    - option "Revente"
+                    - option "Mixte"
+                - generic [ref=e61]:
+                  - generic [ref=e62]: Stratégie
+                  - combobox [ref=e63]:
+                    - option "Core" [selected]
+                    - option "Core+"
+                    - option "Value Add"
+              - generic [ref=e64]:
+                - generic [ref=e65]:
+                  - generic [ref=e66]: Typologie de l'actif
+                  - combobox [ref=e67]:
+                    - option "Résidentiel" [selected]
+                    - option "Bureau"
+                    - option "Logistique"
+                    - option "Commerce"
+                    - option "Mixte"
+                - generic [ref=e68]:
+                  - generic [ref=e69]:
+                    - generic [ref=e70]: Surface (m²)
+                    - spinbutton [ref=e71]: "150"
+                  - generic [ref=e72]:
+                    - generic [ref=e73]: Durée BP (ans)
+                    - spinbutton [ref=e74]: "7"
+          - generic [ref=e75]:
+            - heading "2 Localisation" [level=2] [ref=e76]:
+              - generic [ref=e77]: "2"
+              - text: Localisation
+            - generic [ref=e78]:
+              - generic [ref=e79]:
+                - generic [ref=e80]: Adresse*
+                - textbox "45 Avenue Foch" [ref=e81]: 10 Rue de la Paix
+              - generic [ref=e82]:
+                - generic [ref=e83]:
+                  - generic [ref=e84]: Ville*
+                  - textbox "Paris" [ref=e85]: Lyon
+                - generic [ref=e86]:
+                  - generic [ref=e87]: Code postal*
+                  - textbox "75016" [ref=e88]: "69002"
+          - generic [ref=e89]:
+            - heading "3 Acquisition" [level=2] [ref=e90]:
+              - generic [ref=e91]: "3"
+              - text: Acquisition
+            - generic [ref=e92]:
+              - generic [ref=e93]:
+                - generic [ref=e94]: Prix d'acquisition (€)
+                - spinbutton [ref=e95]: "1500000"
+              - generic [ref=e96]:
+                - generic [ref=e97]:
+                  - generic [ref=e98]: Frais de notaire (€)
+                  - spinbutton [ref=e99]: "120000"
+                - generic [ref=e100]:
+                  - generic [ref=e101]: Due diligence (€)
+                  - spinbutton [ref=e102]: "15000"
+              - generic [ref=e103]:
+                - generic [ref=e104]: Yield à l'acquisition (%)
+                - spinbutton [ref=e105]: "4.5"
+          - generic [ref=e106]:
+            - heading "4 État locatif" [level=2] [ref=e107]:
+              - generic [ref=e108]: "4"
+              - text: État locatif
+            - generic [ref=e109]:
+              - generic [ref=e110]:
+                - generic [ref=e111]:
+                  - generic [ref=e112]: WALB (ans)
+                  - spinbutton [ref=e113]: "3.2"
+                - generic [ref=e114]:
+                  - generic [ref=e115]: WALT (ans)
+                  - spinbutton [ref=e116]: "5.8"
+              - generic [ref=e117]:
+                - generic [ref=e118]:
+                  - generic [ref=e119]: Loyer actuel (€/an)
+                  - spinbutton [ref=e120]: "75000"
+                - generic [ref=e121]:
+                  - generic [ref=e122]: VLM (€/an)
+                  - spinbutton [ref=e123]: "85000"
+              - generic [ref=e124]:
+                - generic [ref=e125]: Taux d'occupation (%)
+                - spinbutton [active] [ref=e126]: "95"
+          - generic [ref=e127]:
+            - heading "5 Données financières" [level=2] [ref=e128]:
+              - generic [ref=e129]: "5"
+              - text: Données financières
+            - generic [ref=e130]:
+              - generic [ref=e131]:
+                - generic [ref=e132]: Budget travaux (€)
+                - spinbutton [ref=e133]
+              - generic [ref=e134]:
+                - generic [ref=e135]: Valeur estimée (€)
+                - spinbutton [ref=e136]
+                - paragraph [ref=e137]: Valeur après travaux
+          - generic [ref=e138]:
+            - heading "6 Détail CAPEX" [level=2] [ref=e139]:
+              - generic [ref=e140]: "6"
+              - text: Détail CAPEX
+            - generic [ref=e141]:
+              - generic [ref=e142]:
+                - generic [ref=e143]: Gros œuvre (€)
+                - spinbutton [ref=e144]
+              - generic [ref=e145]:
+                - generic [ref=e146]: Second œuvre (€)
+                - spinbutton [ref=e147]
+              - generic [ref=e148]:
+                - generic [ref=e149]: Aménagements (€)
+                - spinbutton [ref=e150]
+              - generic [ref=e151]:
+                - generic [ref=e152]: Autres travaux (€)
+                - spinbutton [ref=e153]
+          - generic [ref=e154]:
+            - heading "7 Financement" [level=2] [ref=e155]:
+              - generic [ref=e156]: "7"
+              - text: Financement
+            - generic [ref=e157]:
+              - generic [ref=e158]:
+                - generic [ref=e159]: Montant financement (€)
+                - spinbutton [ref=e160]
+              - generic [ref=e161]:
+                - generic [ref=e162]:
+                  - generic [ref=e163]: LTV (%)
+                  - spinbutton [ref=e164]
+                - generic [ref=e165]:
+                  - generic [ref=e166]: Taux (%)
+                  - spinbutton [ref=e167]
+                - generic [ref=e168]:
+                  - generic [ref=e169]: Durée (ans)
+                  - spinbutton [ref=e170]
+          - generic [ref=e171]:
+            - button "Créer le projet" [ref=e172] [cursor=pointer]
+            - button "Annuler" [ref=e173] [cursor=pointer]
+```

@@ -6,9 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api';
 import { useAuthStore } from '@/store/authStore';
 import { DataGrid, projectColumns, type Project } from '@/components/ui/data-grid';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { GlassCard } from '@/components/ui/GlassCard';
+import DashboardLayout from '@/components/layout/DashboardLayout';
 import { Button } from '@/components/ui/Button';
-import { Badge } from '@/components/ui/Badge';
 import { Plus, TrendingUp, AlertTriangle, FileText, LogOut, User } from 'lucide-react';
 
 interface DashboardStats {
@@ -34,7 +34,7 @@ export default function DashboardPage() {
     router.push('/login');
   };
 
-  // Charger les projets
+  // Charger les projets ET les stats BP
   const { data: projectsData, isLoading: projectsLoading } = useQuery({
     queryKey: ['projects'],
     queryFn: async () => {
@@ -48,47 +48,54 @@ export default function DashboardPage() {
     },
   });
 
+  // Charger stats BP depuis nouveau endpoint
+  const { data: bpStats, isLoading: statsLoading } = useQuery({
+    queryKey: ['dashboard-stats', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      try {
+        const response = await apiClient.get(`/dashboard/stats?user_id=${user.id}`);
+        return response.data.stats;
+      } catch (error) {
+        console.error('Erreur stats BP:', error);
+        return null;
+      }
+    },
+    enabled: !!user?.id
+  });
+
   const projects: Project[] = Array.isArray(projectsData) ? projectsData : [];
 
-  // Calculer les stats
-  const stats: DashboardStats = React.useMemo(() => {
-    return {
-      total_projects: projects.length,
-      active_projects: projects.filter(p => p.status === 'En cours').length,
-      average_tri: projects.length > 0
-        ? projects.reduce((sum, p) => sum + (p.tri_avant_is || 0), 0) / projects.length
-        : 0,
-      total_investment: projects.reduce((sum, p) => sum + (p.prix_acquisition || 0), 0),
-    };
-  }, [projects]);
+  // Calculer investissement total pour affichage
+  const totalInvestment = projects.reduce((sum, p) => sum + ((p.purchase_price || p.acquisition_price) || 0), 0);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-purple-950 p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <DashboardLayout>
+      <div className="space-y-8">
         {/* Header */}
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Dashboard</h1>
-            <p className="text-gray-400">Vue d'ensemble de vos projets immobiliers</p>
+            <p className="text-slate-400">Vue d'ensemble de vos projets immobiliers</p>
           </div>
           <div className="flex items-center gap-3">
             {user && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700">
-                <User className="w-4 h-4 text-gray-400" />
-                <span className="text-sm text-gray-300">{user.email}</span>
-              </div>
+              <GlassCard className="flex items-center gap-2 px-4 py-2 border-white/10 bg-white/5">
+                <User className="w-4 h-4 text-slate-400" />
+                <span className="text-sm text-slate-300">{user.email}</span>
+              </GlassCard>
             )}
             <Button
               onClick={handleLogout}
-              variant="outline"
-              className="border-gray-700 text-gray-300 hover:bg-red-600 hover:border-red-600 hover:text-white"
+              variant="glass"
+              className="text-slate-300 hover:text-red-400 hover:bg-red-500/10 border-white/10"
             >
               <LogOut className="w-4 h-4 mr-2" />
               Déconnexion
             </Button>
             <Button
               onClick={() => router.push('/projects/new')}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20"
             >
               <Plus className="w-4 h-4 mr-2" />
               Nouveau Projet
@@ -96,75 +103,97 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Stats Cards */}
+        {/* Stats Cards - BP Metrics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="bg-gray-900/50 border-gray-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400 mb-1">Projets Totaux</p>
-                  <p className="text-3xl font-bold text-white">{stats.total_projects}</p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                  <FileText className="w-6 h-6 text-blue-400" />
-                </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-400 mb-1">Projets Totaux</p>
+                <p className="text-3xl font-bold text-white">{bpStats?.total_projects || 0}</p>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-900/50 border-gray-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400 mb-1">En Cours</p>
-                  <p className="text-3xl font-bold text-white">{stats.active_projects}</p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
-                  <AlertTriangle className="w-6 h-6 text-yellow-400" />
-                </div>
+              <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center border border-blue-500/10">
+                <FileText className="w-6 h-6 text-blue-400" />
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </GlassCard>
 
-          <Card className="bg-gray-900/50 border-gray-800">
-            <CardContent className="pt-6">
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-400 mb-1">En Cours</p>
+                <p className="text-3xl font-bold text-white">{bpStats?.active_projects || 0}</p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center border border-amber-500/10">
+                <AlertTriangle className="w-6 h-6 text-amber-400" />
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-400 mb-1">Equity Disponible</p>
+                <p className="text-2xl font-bold text-emerald-400">
+                  {bpStats ? `${(bpStats.equity_available / 1000000).toFixed(1)}M€` : 'N/A'}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/10">
+                <TrendingUp className="w-6 h-6 text-emerald-400" />
+              </div>
+            </div>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-400 mb-1">Durée Moy. Restante</p>
+                <p className="text-2xl font-bold text-white">
+                  {bpStats ? `${bpStats.avg_duration_remaining_months.toFixed(0)} mois` : 'N/A'}
+                </p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center border border-purple-500/10">
+                <TrendingUp className="w-6 h-6 text-purple-400" />
+              </div>
+            </div>
+          </GlassCard>
+
+          {bpStats?.technical_score_avg && (
+            <GlassCard className="p-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-400 mb-1">TRI Moyen</p>
-                  <p className="text-3xl font-bold text-white">
-                    {(stats.average_tri * 100).toFixed(1)}%
+                  <p className="text-sm text-slate-400 mb-1">Score Technique Moyen</p>
+                  <p className="text-3xl font-bold text-sky-400">
+                    {bpStats.technical_score_avg.toFixed(1)}/100
                   </p>
                 </div>
-                <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-green-400" />
+                <div className="w-12 h-12 rounded-xl bg-sky-500/20 flex items-center justify-center border border-sky-500/10">
+                  <TrendingUp className="w-6 h-6 text-sky-400" />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </GlassCard>
+          )}
 
-          <Card className="bg-gray-900/50 border-gray-800">
-            <CardContent className="pt-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-gray-400 mb-1">Investissement Total</p>
-                  <p className="text-2xl font-bold text-white">
-                    {(stats.total_investment / 1000000).toFixed(1)}M€
-                  </p>
-                </div>
-                <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                  <TrendingUp className="w-6 h-6 text-purple-400" />
-                </div>
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm text-slate-400 mb-1">Investissement Total</p>
+                <p className="text-2xl font-bold text-white">
+                  {(totalInvestment / 1000000).toFixed(1)}M€
+                </p>
               </div>
-            </CardContent>
-          </Card>
+              <div className="w-12 h-12 rounded-xl bg-indigo-500/20 flex items-center justify-center border border-indigo-500/10">
+                <FileText className="w-6 h-6 text-indigo-400" />
+              </div>
+            </div>
+          </GlassCard>
         </div>
 
         {/* Projects Table */}
-        <Card className="bg-gray-900/50 border-gray-800">
-          <CardHeader>
-            <CardTitle className="text-white">Tous les Projets</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <GlassCard className="p-0 overflow-hidden">
+          <div className="p-6 border-b border-white/10">
+            <h2 className="text-xl font-bold text-white">Tous les Projets</h2>
+          </div>
+          <div className="p-6">
             <DataGrid
               data={projects}
               columns={projectColumns}
@@ -172,9 +201,9 @@ export default function DashboardPage() {
               loading={projectsLoading}
               emptyMessage="Aucun projet créé. Commencez par créer votre premier projet !"
             />
-          </CardContent>
-        </Card>
+          </div>
+        </GlassCard>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

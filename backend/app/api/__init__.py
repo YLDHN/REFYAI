@@ -1,6 +1,5 @@
 from fastapi import APIRouter
 
-# Import des routers
 from app.api import (
     auth,
     projects,
@@ -19,7 +18,8 @@ from app.api import (
     scraper,
     compliance,
     scoring,
-    exports
+    exports,
+    dashboard  # BP
 )
 
 api_router = APIRouter(prefix="/api")
@@ -43,3 +43,4 @@ api_router.include_router(scraper.router)
 api_router.include_router(compliance.router)
 api_router.include_router(scoring.router)
 api_router.include_router(exports.router)
+api_router.include_router(dashboard.router)  # BP

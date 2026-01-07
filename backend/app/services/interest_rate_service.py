@@ -71,18 +71,25 @@ class InterestRateService:
     def calculate_risk_score(
         self,
         project_data: Dict[str, Any],
-        company_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        company_data: Dict[str, Any],
+        market_trend: str = "stable",
+        technical_issues: list = None
+    ) -> float:
         """
         Calcule le score de risque du projet
         
+        Args:
+            project_data: Données du projet
+            company_data: Données de l'entreprise  
+            market_trend: Tendance du marché ("hausse", "stable", "baisse")
+            technical_issues: Liste des problèmes techniques
+        
         Returns:
-            {
-                "score": float (0-100),
-                "category": str,
-                "factors": Dict[str, float]
-            }
+            Score de risque (0-100)
         """
+        if technical_issues is None:
+            technical_issues = []
+            
         score = 100.0
         factors = {}
         
@@ -104,8 +111,8 @@ class InterestRateService:
         factors["tri_risk"] = tri_risk
         
         # 4. Risque réglementaire (-0 à -10 points)
-        showstoppers = project_data.get("showstoppers", [])
-        regulatory_risk = min(10, len(showstoppers) * 3)
+        showstoppers_count = project_data.get("showstoppers_count", 0)
+        regulatory_risk = min(10, showstoppers_count * 3)
         score -= regulatory_risk
         factors["regulatory_risk"] = regulatory_risk
         
@@ -115,87 +122,97 @@ class InterestRateService:
         factors["experience_risk"] = experience_risk
         
         # 6. Risque marché (-0 à -10 points)
-        market_trend = project_data.get("market_trend", {}).get("trend", "stable")
         market_risk = 10 if market_trend == "baisse" else (5 if market_trend == "stable" else 0)
         score -= market_risk
         factors["market_risk"] = market_risk
         
         # 7. Risque technique (-0 à -15 points)
-        technical_issues = project_data.get("technical_analysis", {}).get("major_issues", [])
         technical_risk = min(15, len(technical_issues) * 5)
         score -= technical_risk
         factors["technical_risk"] = technical_risk
         
         score = max(0, min(100, score))
         
-        # Catégorisation
-        if score >= 85:
-            category = "excellent"
-        elif score >= 70:
-            category = "bon"
-        elif score >= 50:
-            category = "moyen"
-        else:
-            category = "risque"
-        
-        return {
-            "score": round(score, 2),
-            "category": category,
-            "factors": factors,
-            "interpretation": self._interpret_score(score)
-        }
+        return round(score, 2)
     
     async def calculate_interest_rate(
         self,
         project_data: Dict[str, Any],
         company_data: Dict[str, Any],
-        loan_duration_months: int = 24
+        loan_duration_months: int = 24,
+        market_trend: str = "stable",
+        technical_issues: list = None
     ) -> Dict[str, Any]:
         """
         Calcule le taux d'intérêt personnalisé
         
+        Args:
+            project_data: Données du projet
+            company_data: Données de l'entreprise
+            loan_duration_months: Durée du prêt en mois
+            market_trend: Tendance du marché
+            technical_issues: Liste des problèmes techniques
+        
         Returns:
             {
-                "euribor_base": float,
-                "risk_margin": float,
-                "final_rate": float,
-                "risk_score": Dict,
+                "euribor": float,
+                "margin": float,
+                "interest_rate": float,
+                "risk_score": float,
+                "category": str,
                 "monthly_rate": float
             }
         """
+        if technical_issues is None:
+            technical_issues = []
+            
         # 1. Récupérer Euribor
         maturity = "12m" if loan_duration_months >= 12 else "3m"
         euribor = await self.get_current_euribor(maturity)
         
         # 2. Calculer score de risque
-        risk_assessment = self.calculate_risk_score(project_data, company_data)
-        
-        # 3. Déterminer marge de base
-        base_margin = self.BASE_MARGIN[risk_assessment["category"]]
-        
-        # 4. Ajuster la marge selon facteurs spécifiques
-        adjusted_margin = self._adjust_margin(
-            base_margin,
-            risk_assessment,
-            project_data,
-            company_data
+        risk_score = self.calculate_risk_score(
+            project_data, 
+            company_data, 
+            market_trend,
+            technical_issues
         )
         
+        # 3. Déterminer catégorie et marge de base
+        if risk_score >= 85:
+            category = "excellent"
+        elif risk_score >= 70:
+            category = "bon"
+        elif risk_score >= 50:
+            category = "moyen"
+        else:
+            category = "risque"
+            
+        base_margin = self.BASE_MARGIN[category]
+        
+        # 4. Ajuster la marge selon facteurs spécifiques
+        adjusted_margin = base_margin
+        
+        # Ajustements fins
+        if project_data.get("ltv", 0) > 80:
+            adjusted_margin += 0.3
+        if project_data.get("tri", 0) < 8:
+            adjusted_margin += 0.2
+        
         # 5. Taux final
-        final_rate = euribor + adjusted_margin
+        interest_rate = euribor + adjusted_margin
         
         # Plancher et plafond
-        final_rate = max(3.0, min(8.0, final_rate))
+        interest_rate = max(3.0, min(8.0, interest_rate))
         
         return {
-            "euribor_base": round(euribor, 2),
-            "base_margin": round(base_margin, 2),
-            "adjusted_margin": round(adjusted_margin, 2),
-            "final_rate": round(final_rate, 2),
-            "monthly_rate": round(final_rate / 12, 4),
-            "risk_score": risk_assessment,
-            "duration_months": loan_duration_months,
-            "recommendation": self._generate_rate_recommendation(final_rate)
+            "euribor": round(euribor, 2),
+            "margin": round(adjusted_margin, 2),
+            "interest_rate": round(interest_rate, 2),
+            "risk_score": round(risk_score, 2),
+            "category": category,
+            "monthly_rate": round(interest_rate / 12, 4),
+            "duration_months": loan_duration_months
         }
     
     def _assess_location_risk(self, city: str) -> float:

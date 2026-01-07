@@ -31,8 +31,8 @@ cd /Users/yld/Documents/REFYAI/backend
 
 # Créer l'environnement virtuel si nécessaire
 if [ ! -d "venv" ]; then
-    echo "📦 Création de l'environnement virtuel..."
-    python3 -m venv venv
+    echo "📦 Création de l'environnement virtuel avec Python 3.12..."
+    /opt/homebrew/bin/python3.12 -m venv venv
 fi
 
 # Activer l'environnement virtuel
@@ -57,7 +57,7 @@ echo "🗄️  Étape 3/5: Configuration de la base de données..."
 if [ ! -f ".env" ]; then
     echo "📝 Création du fichier .env..."
     cat > .env << EOF
-DATABASE_URL=sqlite:///./refyai.db
+DATABASE_URL=sqlite+aiosqlite:///./refyai.db
 SECRET_KEY=dev-secret-key-change-in-production
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30

@@ -166,7 +166,8 @@ test.describe('Test VISIBLE - Création de projet via formulaire', () => {
 
     // 20. Prix d'achat
     console.log('  → 20. Prix achat...');
-    await page.locator('input[name="purchasePrice"]').fill('450000');
+    const purchasePriceField = page.locator('input[name="purchasePrice"]').or(page.locator('input[name="purchase_price"]')).or(page.getByLabel(/prix.*achat/i));
+    await purchasePriceField.fill('450000', { timeout: 10000 });
     await page.waitForTimeout(500);
     console.log('  ✅ Prix achat: 450 000 €');
 

@@ -1,0 +1,52 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - navigation [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e11]: R
+        - generic [ref=e12]: REFY AI
+      - generic [ref=e13]:
+        - link "Se Connecter" [ref=e14] [cursor=pointer]:
+          - /url: /login
+          - button "Se Connecter" [ref=e15]
+        - link "Commencer" [ref=e16] [cursor=pointer]:
+          - /url: /signup
+          - button "Commencer" [ref=e17]
+    - main [ref=e18]:
+      - generic [ref=e19]:
+        - generic [ref=e22]: Nouvelle version disponible
+        - heading "L'Intelligence Artificielle au service de l'Analyse Immobilière" [level=1] [ref=e23]:
+          - text: L'Intelligence Artificielle au service de
+          - text: l'Analyse Immobilière
+        - paragraph [ref=e24]: Automatisez vos études de faisabilité, générez des rapports financiers précis et débloquez le potentiel de vos investissements en quelques secondes.
+        - generic [ref=e25]:
+          - link "Lancer une Analyse" [ref=e26] [cursor=pointer]:
+            - /url: /login
+            - button "Lancer une Analyse" [ref=e27]
+          - link "Découvrir les fonctionnalités" [ref=e28] [cursor=pointer]:
+            - /url: "#features"
+            - button "Découvrir les fonctionnalités" [ref=e29]
+      - generic [ref=e51]:
+        - generic [ref=e52]:
+          - img [ref=e54]
+          - heading "Analyses Automatisées" [level=3] [ref=e56]
+          - paragraph [ref=e57]: Laissez nos algorithmes traiter des documents complexes (PLU, bilans) pour en extraire les données clés instantanément.
+        - generic [ref=e58]:
+          - img [ref=e60]
+          - heading "Modélisation Financière" [level=3] [ref=e62]
+          - paragraph [ref=e63]: Générez des prévisionnels financiers détaillés (Cashflow, ROI, TRI) basés sur des données de marché en temps réel.
+        - generic [ref=e64]:
+          - img [ref=e66]
+          - heading "Assistant IA Dédié" [level=3] [ref=e68]
+          - paragraph [ref=e69]: Dialoguez avec votre projet. Posez des questions sur la réglementation ou la rentabilité et obtenez des réponses précises.
+    - contentinfo [ref=e70]:
+      - generic [ref=e71]:
+        - paragraph [ref=e72]: © 2026 REFY AI - Tous droits réservés.
+        - generic [ref=e73]:
+          - generic [ref=e74] [cursor=pointer]: Mentions Légales
+          - generic [ref=e75] [cursor=pointer]: Confidentialité
+          - generic [ref=e76] [cursor=pointer]: Contact
+  - alert [ref=e77]
+```

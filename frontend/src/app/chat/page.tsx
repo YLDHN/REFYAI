@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import DashboardLayout from '@/components/layout/DashboardLayout';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -61,146 +62,131 @@ export default function ChatPage() {
 
   return (
     <DashboardLayout>
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Chat IA</h1>
-              <p className="text-gray-600 mt-1">Votre assistant intelligent pour l'analyse immobilière</p>
-            </div>
-            <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition text-sm font-medium text-gray-700">
-              Nouvelle conversation
-            </button>
+      <div className="flex flex-col h-[calc(100vh-theme(spacing.24))]">
+        {/* Header Content */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-2">Chat IA</h1>
+            <p className="text-slate-400">Votre assistant intelligent pour l'analyse immobilière</p>
           </div>
+          <button className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-slate-300 hover:bg-white/10 hover:text-white transition-all text-sm font-medium">
+            Nouvelle conversation
+          </button>
         </div>
-      </div>
 
-      {/* Chat Container */}
-      <div className="flex-1 max-w-4xl w-full mx-auto px-6 py-8 flex flex-col">
-        {/* Messages */}
-        <div className="flex-1 space-y-6 mb-6 overflow-y-auto">
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div className={`flex items-start space-x-3 max-w-3xl ${message.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                {/* Avatar */}
-                <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                  message.role === 'assistant' 
-                    ? 'bg-blue-600 text-white' 
-                    : 'bg-gray-200 text-gray-700'
-                }`}>
-                  {message.role === 'assistant' ? (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                    </svg>
-                  ) : (
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  )}
-                </div>
+        {/* Chat Container */}
+        <GlassCard className="flex-1 flex flex-col min-h-0 overflow-hidden relative">
+          
+          {/* Messages Area */}
+          <div className="flex-1 overflow-y-auto p-6 space-y-6 scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+              >
+                <div className={`flex items-start gap-4 max-w-3xl ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
+                  {/* Avatar */}
+                  <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg ${
+                    message.role === 'assistant' 
+                      ? 'bg-gradient-to-br from-blue-500 to-purple-600 text-white' 
+                      : 'bg-slate-700 text-slate-300'
+                  }`}>
+                    {message.role === 'assistant' ? (
+                      <span className="text-lg">🤖</span>
+                    ) : (
+                      <span className="text-lg">👤</span>
+                    )}
+                  </div>
 
-                {/* Message Bubble */}
-                <div className={`rounded-lg px-4 py-3 ${
-                  message.role === 'assistant'
-                    ? 'bg-white border border-gray-200'
-                    : 'bg-blue-600 text-white'
-                }`}>
-                  <p className={`text-sm ${message.role === 'assistant' ? 'text-gray-900' : 'text-white'}`}>
-                    {message.content}
-                  </p>
-                  <p className={`text-xs mt-1 ${message.role === 'assistant' ? 'text-gray-500' : 'text-blue-100'}`}>
-                    {message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {loading && (
-            <div className="flex justify-start">
-              <div className="flex items-start space-x-3 max-w-3xl">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg px-4 py-3">
-                  <div className="flex space-x-2">
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                  {/* Message Bubble */}
+                  <div className={`rounded-2xl px-6 py-4 shadow-lg backdrop-blur-sm ${
+                    message.role === 'assistant'
+                      ? 'bg-white/5 border border-white/10 text-slate-200'
+                      : 'bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-blue-500/20'
+                  }`}>
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {message.content}
+                    </p>
+                    <p className={`text-[10px] mt-2 font-medium ${message.role === 'assistant' ? 'text-slate-500' : 'text-blue-100/70'}`}>
+                      {message.timestamp.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}
+                    </p>
                   </div>
                 </div>
               </div>
+            ))}
+
+            {loading && (
+              <div className="flex justify-start">
+                <div className="flex items-start gap-4 max-w-3xl">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <span className="text-lg">🤖</span>
+                  </div>
+                  <div className="bg-white/5 border border-white/10 rounded-2xl px-6 py-4">
+                    <div className="flex space-x-2">
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-75"></div>
+                      <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-150"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Empty State Suggestions */}
+            {messages.length === 1 && !loading && (
+              <div className="mt-12 mb-6">
+                <p className="text-sm font-medium text-slate-400 mb-4 px-1">Suggestions de questions :</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => setInput(suggestion.replace(/^[^\s]+\s/, ''))}
+                      className="text-left p-4 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10 transition-all group"
+                    >
+                      <span className="text-sm text-slate-300 group-hover:text-white transition-colors">
+                        {suggestion}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Input Area */}
+          <div className="p-4 border-t border-white/10 bg-black/20 backdrop-blur-md">
+            <div className="relative flex items-end gap-2 bg-slate-900/50 border border-white/10 rounded-xl p-2 focus-within:border-blue-500/50 focus-within:ring-1 focus-within:ring-blue-500/50 transition-all">
+              <textarea
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Posez votre question à l'IA..."
+                rows={1}
+                className="flex-1 max-h-32 resize-none bg-transparent border-0 focus:ring-0 text-slate-200 placeholder-slate-500 text-sm py-3 px-2 scrollbar-thin"
+                style={{ minHeight: '44px' }}
+              />
+              <button
+                onClick={handleSend}
+                disabled={!input.trim() || loading}
+                className="p-2.5 rounded-lg bg-gradient-to-r from-blue-600 to-blue-500 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5 transition-all flex-shrink-0"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+              </button>
             </div>
-          )}
-        </div>
-
-        {/* Suggestions (show only when no messages) */}
-        {messages.length === 1 && (
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 mb-3">Suggestions :</p>
-            <div className="grid grid-cols-2 gap-3">
-              {suggestions.map((suggestion, index) => (
-                <button
-                  key={index}
-                  onClick={() => setInput(suggestion.replace(/^[^\s]+\s/, ''))}
-                  className="text-left p-3 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition text-sm text-gray-700"
-                >
-                  {suggestion}
-                </button>
-              ))}
+            <div className="flex items-center justify-between mt-3 text-xs text-slate-500 px-1">
+              <div className="flex items-center gap-2">
+                <svg className="w-4 h-4 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>L'IA utilise vos données projets pour contextaliser ses réponses.</span>
+              </div>
+              <span className={input.length > 1800 ? 'text-orange-400' : ''}>{input.length}/2000</span>
             </div>
           </div>
-        )}
-
-        {/* Input Area */}
-        <div className="bg-white border border-gray-200 rounded-lg p-4">
-          <div className="flex items-end space-x-3">
-            <textarea
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyPress={handleKeyPress}
-              placeholder="Posez votre question..."
-              rows={1}
-              className="flex-1 resize-none border-0 focus:ring-0 text-gray-900 placeholder-gray-500 text-sm"
-            />
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition flex-shrink-0"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </button>
-          </div>
-          <div className="flex items-center justify-between mt-2 text-xs text-gray-500">
-            <span>Appuyez sur Entrée pour envoyer</span>
-            <span>{input.length}/2000</span>
-          </div>
-        </div>
+        </GlassCard>
       </div>
-
-      {/* Info Banner */}
-      <div className="bg-blue-50 border-t border-blue-200">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <div className="flex items-center space-x-3">
-            <svg className="w-5 h-5 text-blue-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="text-sm text-gray-700">
-              💡 Astuce : L'IA a accès à toutes vos données de projets et peut vous aider à analyser vos investissements.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
     </DashboardLayout>
   );
 }

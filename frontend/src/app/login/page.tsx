@@ -4,11 +4,11 @@ import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/store/authStore';
 import { apiClient } from '@/lib/api';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
+import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/label';
 import { AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -54,72 +54,84 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-blue-950 to-purple-950 flex items-center justify-center p-6">
-      <Card className="w-full max-w-md bg-gray-900/50 border-gray-800">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-white text-center">
-            Connexion
-          </CardTitle>
-          <CardDescription className="text-gray-400 text-center">
-            Connectez-vous à votre compte REFYAI
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen relative flex items-center justify-center p-6 overflow-hidden">
+       {/* Background Decor */}
+       <div className="fixed inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-slate-900 to-black"></div>
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-purple-600/20 rounded-full blur-[128px]"></div>
+        <div className="absolute bottom-0 right-0 w-96 h-96 bg-blue-600/10 rounded-full blur-[128px]"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        <div className="text-center mb-8">
+           <Link href="/" className="inline-flex items-center gap-2 mb-4">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                <span className="text-white font-bold text-xl">R</span>
+              </div>
+              <span className="text-2xl font-bold text-white">REFY AI</span>
+           </Link>
+           <h2 className="text-xl text-slate-300">Bienvenue</h2>
+        </div>
+
+        <GlassCard className="backdrop-blur-xl border-white/10">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-white">Connexion</h1>
+              <p className="text-slate-400 text-sm mt-1">Accédez à votre espace d'analyse</p>
+            </div>
+
             {error && (
-              <div className="bg-red-500/10 border border-red-500/50 rounded-lg p-3 flex items-start gap-2">
+              <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 flex items-start gap-3">
                 <AlertCircle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                 <p className="text-sm text-red-400">{error}</p>
               </div>
             )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-gray-300">
-                Email
-              </Label>
+            <div className="space-y-4">
               <Input
+                label="Email"
                 id="email"
                 type="email"
-                placeholder="Email"
+                placeholder="email@exemple.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
               />
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-gray-300">
-                Mot de passe
-              </Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="Mot de passe"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-              />
+              <div className="space-y-1">
+                <Input
+                  label="Mot de passe"
+                  id="password"
+                  type="password"
+                  placeholder="Mot de passe"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <div className="flex justify-end">
+                   <a href="#" className="text-xs text-blue-400 hover:text-blue-300 transition-colors">Mot de passe oublié ?</a>
+                </div>
+              </div>
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white"
-              disabled={loading}
+              variant="primary"
+              className="w-full py-3 text-lg font-semibold shadow-blue-500/20"
+              isLoading={loading}
             >
-              {loading ? 'Connexion...' : 'Se connecter'}
+              Se connecter
             </Button>
 
-            <div className="text-center text-sm text-gray-400">
-              <p>Compte de test :</p>
-              <p className="font-mono text-xs mt-1">
+            <div className="text-center pt-4 border-t border-white/5">
+              <p className="text-xs text-slate-500 mb-2">Compte de test :</p>
+              <code className="px-2 py-1 rounded bg-slate-950/50 border border-white/5 text-xs text-slate-400 font-mono">
                 demo@refyai.com / demo123
-              </p>
+              </code>
             </div>
           </form>
-        </CardContent>
-      </Card>
+        </GlassCard>
+      </div>
     </div>
   );
 }

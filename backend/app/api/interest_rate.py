@@ -137,3 +137,184 @@ async def get_margin_info():
         "range": "3.0% - 8.0%",
         "note": "Taux final plafonné entre 3% et 8%"
     }
+
+
+# ===== NOUVEAUX ENDPOINTS BP : FINANCEMENT INVERSÉ =====
+
+from app.services.euribor_service import euribor_service
+from app.services.financing_calculator import (
+    calculate_financing_amount,
+    calculate_equity_required,
+    calculate_dscr,
+    calculate_annual_debt_service,
+    get_recommended_ltv,
+    AmortizationType,
+    StrategyType
+)
+
+
+class FinancingCalculationRequest(BaseModel):
+    """Calcul financement depuis LTV (logique inversée BP)"""
+    purchase_price: float
+    ltv: float  # En pourcentage (ex: 70 pour 70%)
+    strategy: str = "core"  # core, core_plus, value_add
+
+
+class DSCRCalculationRequest(BaseModel):
+    """Calcul DSCR pour projets Core"""
+    noi: float  # Net Operating Income annuel
+    loan_amount: float
+    annual_interest_rate: float  # En décimal (ex: 0.035 pour 3.5%)
+    duration_years: int
+    amortization_type: str = "constant"
+
+
+@router.get("/euribor-realtime")
+async def get_euribor_realtime():
+    """
+    🆕 Récupération Euribor 1M en temps réel (BP)
+    
+    Returns:
+        Taux Euribor actuel depuis source publique
+    """
+    euribor_data = euribor_service.get_euribor_1m()
+    
+    return {
+        "success": True,
+        "euribor": euribor_data
+    }
+
+
+@router.post("/calculate-financing")
+async def calculate_financing(request: FinancingCalculationRequest):
+    """
+    🆕 Calcul financement depuis LTV (logique inversée BP)
+    
+    Entrée: LTV → Sortie: Montant financement
+    
+    Body:
+        {
+            "purchase_price": 1000000,
+            "ltv": 70,
+            "strategy": "core"
+        }
+    
+    Returns:
+        Montant financement, equity requis, LTV recommandée
+    """
+    # Calculs
+    financing_amount = calculate_financing_amount(request.purchase_price, request.ltv)
+    equity_required = calculate_equity_required(request.purchase_price, request.ltv)
+    
+    # Récupérer Euribor actuel
+    euribor_data = euribor_service.get_euribor_1m()
+    
+    # Recommandation LTV selon stratégie
+    strategy_enum = StrategyType(request.strategy)
+    ltv_recommendation = get_recommended_ltv(strategy_enum, "standard")
+    
+    # Estimation marge bancaire (simplifiée)
+    risk_margin = 1.5 if request.strategy == "core" else 2.0 if request.strategy == "core_plus" else 2.5
+    estimated_rate = euribor_data["rate"] + risk_margin
+    
+    return {
+        "success": True,
+        "financing": {
+            "purchase_price": request.purchase_price,
+            "ltv_input": request.ltv,
+            "financing_amount": round(financing_amount, 2),
+            "equity_required": round(equity_required, 2),
+            "ltv_percentage": request.ltv
+        },
+        "rate_estimate": {
+            "euribor_1m": euribor_data["rate"],
+            "risk_margin": risk_margin,
+            "estimated_total_rate": round(estimated_rate, 2),
+            "euribor_date": euribor_data["date"],
+            "euribor_source": euribor_data["source"]
+        },
+        "ltv_recommendation": ltv_recommendation,
+        "strategy": request.strategy
+    }
+
+
+@router.post("/calculate-dscr")
+async def calculate_dscr_endpoint(request: DSCRCalculationRequest):
+    """
+    🆕 Calcul DSCR (Debt Service Coverage Ratio)
+    
+    Requis pour projets Core selon BP.
+    
+    Body:
+        {
+            "noi": 120000,
+            "loan_amount": 800000,
+            "annual_interest_rate": 0.04,
+            "duration_years": 15,
+            "amortization_type": "constant"
+        }
+    
+    Returns:
+        DSCR avec interprétation et statut
+    """
+    # Calculer service de la dette
+    amortization = AmortizationType(request.amortization_type)
+    debt_service_info = calculate_annual_debt_service(
+        request.loan_amount,
+        request.annual_interest_rate,
+        request.duration_years,
+        amortization
+    )
+    
+    # Calculer DSCR
+    dscr_result = calculate_dscr(
+        request.noi,
+        debt_service_info["annual_debt_service"]
+    )
+    
+    return {
+        "success": True,
+        "dscr": dscr_result,
+        "debt_service": debt_service_info,
+        "inputs": {
+            "noi": request.noi,
+            "loan_amount": request.loan_amount,
+            "annual_rate": request.annual_interest_rate,
+            "duration_years": request.duration_years
+        }
+    }
+
+
+@router.get("/amortization-types")
+async def get_amortization_types():
+    """
+    🆕 Liste des types d'amortissement disponibles
+    
+    Returns:
+        Types avec descriptions
+    """
+    return {
+        "success": True,
+        "amortization_types": [
+            {
+                "key": AmortizationType.CONSTANT.value,
+                "label": "Amortissement constant",
+                "description": "Mensualités constantes (amortissement français classique)"
+            },
+            {
+                "key": AmortizationType.IN_FINE.value,
+                "label": "In Fine",
+                "description": "Remboursement du capital à la fin, intérêts périodiques"
+            },
+            {
+                "key": AmortizationType.PROGRESSIF.value,
+                "label": "Progressif",
+                "description": "Mensualités croissantes dans le temps"
+            },
+            {
+                "key": AmortizationType.DEGRESSIF.value,
+                "label": "Dégressif",
+                "description": "Mensualités décroissantes (amortissement constant du capital)"
+            }
+        ]
+    }

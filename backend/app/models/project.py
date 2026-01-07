@@ -4,11 +4,25 @@ from sqlalchemy.orm import relationship
 import enum
 from app.core.database import Base
 
+import enum
+from app.core.database import Base
+
 class ProjectStatus(str, enum.Enum):
-    DRAFT = "draft"
-    IN_PROGRESS = "in_progress"
-    COMPLETED = "completed"
-    ARCHIVED = "archived"
+    """Status du projet selon Business Plan (8 états)"""
+    ANALYZING = "analyzing"  # En cours d'analyse
+    NEGOTIATING = "negotiating"  # En cours de négo
+    OFFER_SENT = "offer_sent"  # Offre envoyée
+    FINANCING_SEARCH = "financing_search"  # Financement à chercher
+    DUE_DILIGENCE = "due_diligence"  # Due diligence
+    UNDER_CONTRACT = "under_contract"  # Sous promesse
+    ACQUIRED = "acquired"  # Acquis
+    REJECTED = "rejected"  # Refusé
+    
+    # Anciens statuts conservés pour compatibilité
+    DRAFT = "draft"  # Brouillon (mapping → analyzing)
+    IN_PROGRESS = "in_progress"  # En cours (mapping → negotiating)
+    COMPLETED = "completed"  # Terminé (mapping → acquired)
+    ARCHIVED = "archived"  # Archivé
     
     def __str__(self):
         return self.value
@@ -80,6 +94,7 @@ class Project(Base):
     # Renouvellement et CAPEX
     rent_renewal_assumptions = Column(JSON)
     capex_details = Column(JSON)
+    budget_total = Column(Float)  # Budget total (acquisition + travaux + frais) - BP
     
     # Financement
     financing_amount = Column(Float)

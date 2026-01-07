@@ -162,8 +162,8 @@ class TestCoherenceSuggestions:
             typologie="RENOVATION"
         )
         
-        # Fourchette réaliste: 200-1000 €/m²
-        assert 200 <= result["cost_per_m2"] <= 1000
+        # Fourchette réaliste: 200-1800 €/m² (incluant rénovation lourde)
+        assert 200 <= result["cost_per_m2"] <= 1800
     
     @patch('app.services.capex_ai_service.capex_ai_service.suggest_capex')
     def test_montant_total_coherent_avec_surface(self, mock_suggest):

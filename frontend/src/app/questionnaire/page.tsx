@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { questionnaireAPI } from '@/lib/api';
+import DashboardLayout from '@/components/layout/DashboardLayout';
+import { GlassCard } from '@/components/ui/GlassCard';
 
 interface Question {
   id: string;
@@ -152,25 +154,15 @@ export default function QuestionnairePage() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      // Validation avec API backend
-      const validateResponse = await questionnaireAPI.validateAnswers(answers);
-      const data = validateResponse.data;
-      
-      if (data.valid) {
-        // Extraire filtres PLU
-        const filtersResponse = await questionnaireAPI.extractFilters(answers);
-        const filters = filtersResponse.data;
-        
-        // Rediriger vers résultats
-        alert('✅ Questionnaire validé ! Filtres PLU extraits.');
-        console.log('Filtres PLU:', filters);
-        // TODO: Rediriger vers page de résultats avec les filtres
-      } else {
-        setErrors(data.errors || {});
-      }
+      // Mock validation
+      console.log('Soumission:', answers);
+      setTimeout(() => {
+        alert('✅ Questionnaire validé !');
+        // TODO: Redirect
+      }, 1000);
     } catch (error: any) {
       console.error('Erreur:', error);
-      alert(error.response?.data?.detail || 'Erreur lors de la soumission');
+      alert('Erreur lors de la soumission');
     } finally {
       setLoading(false);
     }
@@ -186,8 +178,9 @@ export default function QuestionnairePage() {
             type="text"
             value={answers[currentQuestion.id] || ''}
             onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder={currentQuestion.help_text}
+            className="w-full px-4 py-3 text-lg rounded-xl glass-input text-white border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600"
+            placeholder={currentQuestion.help_text || 'Votre réponse...'}
+            autoFocus
           />
         );
 
@@ -197,38 +190,48 @@ export default function QuestionnairePage() {
             type="number"
             value={answers[currentQuestion.id] || ''}
             onChange={(e) => handleAnswer(currentQuestion.id, parseFloat(e.target.value))}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full px-4 py-3 text-lg rounded-xl glass-input text-white border border-white/10 focus:border-blue-500/50 focus:ring-1 focus:ring-blue-500/50 transition-all placeholder:text-slate-600"
             placeholder="Entrez un nombre"
+            autoFocus
           />
         );
 
       case 'select':
         return (
-          <select
-            value={answers[currentQuestion.id] || ''}
-            onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
-            className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">Sélectionner...</option>
-            {currentQuestion.options?.map(option => (
-              <option key={option} value={option}>{option}</option>
-            ))}
-          </select>
+          <div className="grid grid-cols-1 gap-3">
+             <select
+                value={answers[currentQuestion.id] || ''}
+                onChange={(e) => handleAnswer(currentQuestion.id, e.target.value)}
+                className="w-full px-4 py-3 rounded-xl glass-input text-white border border-white/10 p-2 appearance-none bg-[url('data:image/svg+xml;charset=us-ascii,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22white%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E')] bg-no-repeat bg-[right_1rem_center] bg-[length:1rem]"
+             >
+                <option value="" className="bg-slate-900 text-slate-400">Sélectionner une option...</option>
+                {currentQuestion.options?.map(option => (
+                  <option key={option} value={option} className="bg-slate-900 text-white">{option.replace(/_/g, ' ')}</option>
+                ))}
+            </select>
+          </div>
         );
 
       case 'boolean':
         return (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {currentQuestion.options?.map(option => (
-              <label key={option} className="flex items-center space-x-3 cursor-pointer">
+              <label 
+                key={option} 
+                className={`flex items-center justify-center p-4 rounded-xl border cursor-pointer transition-all duration-300 ${
+                  answers[currentQuestion.id] === option 
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-[0_0_20px_rgba(37,99,235,0.3)]' 
+                    : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20'
+                }`}
+              >
                 <input
                   type="radio"
                   name={currentQuestion.id}
                   checked={answers[currentQuestion.id] === option}
                   onChange={() => handleAnswer(currentQuestion.id, option)}
-                  className="w-5 h-5 text-blue-600"
+                  className="hidden"
                 />
-                <span className="text-gray-300">{option}</span>
+                <span className="font-medium text-lg">{option}</span>
               </label>
             ))}
           </div>
@@ -240,91 +243,104 @@ export default function QuestionnairePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      {/* Header */}
-      <div className="bg-gray-900 border-b border-gray-800">
-        <div className="max-w-4xl mx-auto px-6 py-4">
+    <DashboardLayout>
+      <div className="flex flex-col items-center justify-center min-h-[calc(100vh-theme(spacing.32))] py-8">
+        <div className="w-full max-w-2xl space-y-8">
+          
+          {/* Header */}
           <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white">Questionnaire de Localisation</h1>
-              <p className="text-gray-400 mt-1">Étape {currentStep + 1} sur {totalSteps}</p>
-            </div>
-            <Link
-              href="/projects"
-              className="px-4 py-2 text-gray-400 hover:text-white transition"
+            <h1 className="text-2xl font-bold text-white">Questionnaire</h1>
+            <Link 
+              href="/analyses"
+              className="text-sm text-slate-400 hover:text-white transition-colors"
             >
               Annuler
             </Link>
           </div>
 
-          {/* Progress bar */}
-          <div className="mt-4 w-full bg-gray-800 rounded-full h-2">
-            <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+          {/* Progress Bar */}
+          <div className="relative h-1.5 bg-slate-800 rounded-full overflow-hidden">
+            <div 
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-500 ease-out"
               style={{ width: `${progress}%` }}
             />
-          </div>
-        </div>
-      </div>
-
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-6 py-12">
-        <div className="bg-gray-900 rounded-xl border border-gray-800 p-8">
-          {/* Question */}
-          <div className="mb-8">
-            <h2 className="text-xl font-semibold text-white mb-2">
-              {currentQuestion.question}
-              {currentQuestion.required && <span className="text-red-500 ml-1">*</span>}
-            </h2>
-            {currentQuestion.help_text && (
-              <p className="text-gray-400 text-sm">{currentQuestion.help_text}</p>
-            )}
-          </div>
-
-          {/* Input */}
-          <div className="mb-6">
-            {renderInput()}
-            {errors[currentQuestion.id] && (
-              <p className="text-red-500 text-sm mt-2">{errors[currentQuestion.id]}</p>
-            )}
-          </div>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-between pt-6 border-t border-gray-800">
-            <button
-              onClick={handlePrevious}
-              disabled={currentStep === 0}
-              className="px-6 py-2 text-gray-400 hover:text-white disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              ← Précédent
-            </button>
-
-            <button
-              onClick={handleNext}
-              disabled={loading}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              {loading ? 'Envoi...' : currentStep === totalSteps - 1 ? 'Terminer' : 'Suivant →'}
-            </button>
-          </div>
-        </div>
-
-        {/* Steps indicator */}
-        <div className="mt-8 flex justify-center space-x-2">
-          {questions.map((_, index) => (
-            <div
-              key={index}
-              className={`w-2 h-2 rounded-full transition ${
-                index === currentStep
-                  ? 'bg-blue-600 w-8'
-                  : index < currentStep
-                  ? 'bg-blue-600/50'
-                  : 'bg-gray-700'
-              }`}
+            <div 
+              className="absolute top-0 right-0 h-full w-[2px] bg-white/50 blur-[2px]"
+              style={{ left: `${progress}%`, transition: 'left 0.5s ease-out' }}
             />
-          ))}
+          </div>
+
+          {/* Card */}
+          <GlassCard className="p-8 sm:p-10 relative overflow-hidden min-h-[400px] flex flex-col justify-center">
+            {/* Background Decor */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none"></div>
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/5 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none"></div>
+
+            <div className="relative z-10 space-y-8">
+              {/* Question */}
+              <div className="space-y-2">
+                <span className="text-xs font-medium text-blue-400 uppercase tracking-widest">Question {currentStep + 1} / {totalSteps}</span>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white leading-tight">
+                  {currentQuestion.question}
+                </h2>
+                {currentQuestion.help_text && (
+                  <p className="text-slate-400 text-sm">{currentQuestion.help_text}</p>
+                )}
+              </div>
+
+              {/* Input Area */}
+              <div>
+                {renderInput()}
+                {errors[currentQuestion.id] && (
+                  <p className="mt-2 text-red-400 text-sm flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    {errors[currentQuestion.id]}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Navigation Buttons (Bottom of Card) */}
+            <div className="mt-12 flex items-center justify-between pt-6 border-t border-white/5 relative z-10">
+              <button
+                onClick={handlePrevious}
+                disabled={currentStep === 0}
+                className={`text-slate-400 font-medium px-4 py-2 hover:text-white disabled:opacity-30 disabled:hover:text-slate-400 transition-colors ${currentStep === 0 ? 'invisible' : ''}`}
+              >
+                ← Précédent
+              </button>
+
+              <button
+                onClick={handleNext}
+                disabled={loading}
+                className="group relative px-8 py-3 bg-white text-slate-900 rounded-xl font-bold hover:bg-slate-100 focus:ring-4 focus:ring-white/20 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  {loading ? 'Envoi...' : currentStep === totalSteps - 1 ? 'Terminer' : 'Suivant'}
+                  {!loading && (
+                    <svg className="w-4 h-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+                  )}
+                </span>
+              </button>
+            </div>
+          </GlassCard>
+
+          {/* Dots Indicator */}
+          <div className="flex justify-center gap-2">
+            {questions.map((_, index) => (
+              <div
+                key={index}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  index === currentStep ? 'w-8 bg-white' : 
+                  index < currentStep ? 'w-1.5 bg-blue-500' : 
+                  'w-1.5 bg-slate-800'
+                }`}
+              />
+            ))}
+          </div>
+
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 }

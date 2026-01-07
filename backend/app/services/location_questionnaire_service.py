@@ -150,7 +150,8 @@ class LocationQuestionnaireService:
         filters = {
             "commune": answers.get("commune"),
             "zone": answers.get("zone_plu"),
-            "keywords": []
+            "keywords": [],
+            "constraints": []
         }
         
         # Mots-clés basés sur la destination

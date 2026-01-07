@@ -62,6 +62,14 @@ async def estimate_single_item(
     Returns:
         Estimation min/avg/max
     """
+    # Validation de la quantité
+    if quantity <= 0:
+        raise HTTPException(status_code=400, detail="La quantité doit être supérieure à zéro")
+    
+    # Validation du city_tier
+    if city_tier not in [CityTier.TIER_1, CityTier.TIER_2, CityTier.TIER_3]:
+        raise HTTPException(status_code=400, detail=f"City tier invalide. Valeurs acceptées: 1, 2, 3")
+    
     estimate = capex_service.get_cost_estimate(item_key, quantity, city_tier)
     
     if "error" in estimate:
@@ -212,3 +220,114 @@ async def suggest_capex_with_ai(request: CAPEXAISuggestRequest):
         )
     
     return result
+
+
+# ===== TYPOLOGIE BP : HABITATION / BUREAUX / COMMERCE =====
+
+from app.services.capex_typologie_service import (
+    get_typologie_template,
+    estimate_capex_by_typologie,
+    CAPEXTypology
+)
+
+
+class TypologieEstimateRequest(BaseModel):
+    typologie: str  # "habitation", "bureaux", "commerce"
+    surface: float
+    city_tier: int = 1
+    construction_year: int = 2000
+    project_description: str = ""
+
+
+@router.get("/typologies")
+async def get_available_typologies():
+    """
+    Obtenir les 3 typologies disponibles selon Business Plan
+    
+    Returns:
+        Liste des typologies avec description
+    """
+    return {
+        "success": True,
+        "typologies": [
+            {
+                "key": CAPEXTypology.HABITATION,
+                "label": "Habitation",
+                "description": "Focus : Aménagement résidentiel (appartements, maisons)",
+                "icon": "🏠"
+            },
+            {
+                "key": CAPEXTypology.BUREAUX,
+                "label": "Bureaux",
+                "description": "Focus : Tertiaire avec normes ERP et accessibilité PMR",
+                "icon": "🏢"
+            },
+            {
+                "key": CAPEXTypology.COMMERCE,
+                "label": "Commerce",
+                "description": "Focus : Visibilité, normes ERP (flux de public) et extraction technique",
+                "icon": "🛍️"
+            }
+        ]
+    }
+
+
+@router.get("/typologies/{typologie}/template")
+async def get_typologie_capex_template(typologie: str):
+    """
+    Obtenir le template CAPEX pour une typologie spécifique
+    
+    Args:
+        typologie: "habitation", "bureaux", ou "commerce"
+    
+    Returns:
+        Liste complète des postes CAPEX pour cette typologie
+    """
+    if typologie.lower() not in [CAPEXTypology.HABITATION, CAPEXTypology.BUREAUX, CAPEXTypology.COMMERCE]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Typologie invalide. Valeurs acceptées: habitation, bureaux, commerce"
+        )
+    
+    template = get_typologie_template(typologie)
+    
+    return {
+        "success": True,
+        "typologie": typologie,
+        "template": template,
+        "total_items": len(template),
+        "format_note": "Format liste (sans astérisques) selon Business Plan"
+    }
+
+
+@router.post("/typologies/estimate")
+async def estimate_by_typologie(request: TypologieEstimateRequest):
+    """
+    🤖 Estimation CAPEX automatique selon typologie BP
+    
+    L'IA estime directement les coûts sans saisie manuelle.
+    
+    Body:
+        {
+            "typologie": "habitation",
+            "surface": 800,
+            "city_tier": 1,
+            "construction_year": 1990,
+            "project_description": "Immeuble haussmannien 8 appartements"
+        }
+    
+    Returns:
+        Estimation complète avec tous les postes de la typologie
+    """
+    result = estimate_capex_by_typologie(
+        typologie=request.typologie,
+        surface=request.surface,
+        city_tier=request.city_tier,
+        construction_year=request.construction_year,
+        project_description=request.project_description
+    )
+    
+    return {
+        "success": True,
+        **result
+    }

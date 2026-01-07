@@ -334,6 +334,7 @@ class FinancialService:
         total_principal = sum(s["principal"] for s in schedule)
         
         return {
+            "success": True,
             "loan_amount": loan_amount,
             "annual_rate": annual_rate,
             "annual_rate_pct": f"{annual_rate * 100:.2f}%",
@@ -349,7 +350,8 @@ class FinancialService:
                 "cost_of_credit": round(total_interest, 2),
                 "cost_of_credit_pct": f"{(total_interest / loan_amount) * 100:.2f}%"
             },
-            "schedule": schedule
+            "schedule": schedule,
+            "total_interest": round(total_interest, 2)
         }
     
     def compare_amortization_types(
@@ -423,6 +425,7 @@ class FinancialService:
         cheapest = min(results.items(), key=lambda x: x[1]["total_cost"])
         
         return {
+            "success": True,
             "loan_amount": loan_amount,
             "annual_rate": annual_rate,
             "duration_years": years,

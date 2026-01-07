@@ -34,14 +34,61 @@ model Project {
   postal_code          String?
   project_type         String?
   status               String    @default("draft")
+  
+  // Nouveaux champs stratégie et asset
+  strategy             String?
+  bp_duration          Int?
+  asset_type           String?
+  surface              Float?
+  
+  // Données financières
   purchase_price       Float?
   renovation_budget    Float?
   estimated_value      Float?
+  
+  // Données locatives
+  lease_start_date     DateTime?
+  walb                 Float?
+  walt                 Float?
+  current_rent         Float?
+  market_rent          Float?
+  occupancy_rate       Float?
+  lease_state          Json?
+  
+  // Asset Management
+  rent_free_months     Int?      @default(0)
+  tenant_improvements  Float?    @default(0)
+  indexation_type      String?   @default("ILAT")
+  indexation_rate      Float?
+  indexation_start_year Int?     @default(2)
+  last_indexation_date DateTime?
+  
+  // Acquisition
+  acquisition_price    Float?
+  notary_fees          Float?
+  due_diligence_cost   Float?
+  acquisition_yield    Float?
+  
+  // CAPEX et renouvellement
+  rent_renewal_assumptions Json?
+  capex_details        Json?
+  
+  // Financement
+  financing_amount     Float?
+  ltv                  Float?
+  interest_rate        Float?
+  loan_duration        Int?
+  
+  // Analyses
   regulatory_analysis  Json?
   technical_analysis   Json?
   financial_analysis   Json?
+  
+  // Scores
   technical_score      Float?
   risk_score           Float?
+  
+  // Métadonnées
   created_at           DateTime  @default(now())
   updated_at           DateTime?  @updatedAt
 

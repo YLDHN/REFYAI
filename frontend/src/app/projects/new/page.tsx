@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import DashboardLayout from '@/components/layout/DashboardLayout';
-import { Card, Button, Input, Select } from '@/components/ui';
+import { GlassCard } from '@/components/ui/GlassCard';
+import { Button, Input, Select } from '@/components/ui';
 import { projectsAPI } from '@/lib/api';
 
 export default function NewProjectPage() {
@@ -116,22 +117,29 @@ export default function NewProjectPage() {
 
   return (
     <DashboardLayout>
-      <div className="p-8 max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Nouveau Projet</h1>
-          <p className="text-gray-600 mt-2">Créez un nouveau projet d'analyse immobilière</p>
+          <h1 className="text-3xl font-bold text-white">Nouveau Projet</h1>
+          <p className="text-slate-400 mt-2">Créez un nouveau projet d'analyse immobilière</p>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+          <div className="mb-6 bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl flex items-center gap-2">
+            <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             {error}
           </div>
         )}
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Informations générales */}
-          <Card title="Informations générales" className="mb-6">
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm">1</span>
+              Informations générales
+            </h2>
             <div className="space-y-4">
               <Input
                 label="Nom du projet"
@@ -143,7 +151,7 @@ export default function NewProjectPage() {
               />
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-slate-300 mb-1.5">
                   Description
                 </label>
                 <textarea
@@ -151,75 +159,81 @@ export default function NewProjectPage() {
                   value={formData.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 text-gray-900 placeholder:text-gray-400"
+                  className="w-full px-4 py-2.5 rounded-lg glass-input text-white placeholder-slate-500 transition-all duration-300"
                   placeholder="Description du projet..."
                 />
               </div>
 
-              <Select
-                label="Type de projet"
-                name="projectType"
-                value={formData.projectType}
-                onChange={handleChange}
-                options={[
-                  { value: 'rental', label: 'Locatif' },
-                  { value: 'resale', label: 'Revente' },
-                  { value: 'mixed', label: 'Mixte' },
-                ]}
-                required
-              />
-
-              <Select
-                label="Stratégie d'investissement"
-                name="strategy"
-                value={formData.strategy}
-                onChange={handleChange}
-                options={[
-                  { value: 'core', label: 'Core' },
-                  { value: 'core_plus', label: 'Core+' },
-                  { value: 'value_add', label: 'Value Add' },
-                ]}
-              />
-
-              <Select
-                label="Typologie de l'actif"
-                name="assetType"
-                value={formData.assetType}
-                onChange={handleChange}
-                options={[
-                  { value: 'residential', label: 'Résidentiel' },
-                  { value: 'office', label: 'Bureau' },
-                  { value: 'logistics', label: 'Logistique' },
-                  { value: 'retail', label: 'Commerce' },
-                  { value: 'mixed', label: 'Mixte' },
-                ]}
-              />
-
-              <div className="grid grid-cols-2 gap-4">
-                <Input
-                  label="Surface (m²)"
-                  name="surface"
-                  type="number"
-                  value={formData.surface}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select
+                  label="Type de projet"
+                  name="projectType"
+                  value={formData.projectType}
                   onChange={handleChange}
-                  placeholder="1500"
+                  options={[
+                    { value: 'rental', label: 'Locatif' },
+                    { value: 'resale', label: 'Revente' },
+                    { value: 'mixed', label: 'Mixte' },
+                  ]}
+                  required
                 />
 
-                <Input
-                  label="Durée du BP (années)"
-                  name="bpDuration"
-                  type="number"
-                  value={formData.bpDuration}
+                <Select
+                  label="Stratégie"
+                  name="strategy"
+                  value={formData.strategy}
                   onChange={handleChange}
-                  placeholder="5"
-                  helperText="Pour calcul frais de notaire"
+                  options={[
+                    { value: 'core', label: 'Core' },
+                    { value: 'core_plus', label: 'Core+' },
+                    { value: 'value_add', label: 'Value Add' },
+                  ]}
                 />
               </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Select
+                  label="Typologie de l'actif"
+                  name="assetType"
+                  value={formData.assetType}
+                  onChange={handleChange}
+                  options={[
+                    { value: 'residential', label: 'Résidentiel' },
+                    { value: 'office', label: 'Bureau' },
+                    { value: 'logistics', label: 'Logistique' },
+                    { value: 'retail', label: 'Commerce' },
+                    { value: 'mixed', label: 'Mixte' },
+                  ]}
+                />
+
+                <div className="grid grid-cols-2 gap-4">
+                  <Input
+                    label="Surface (m²)"
+                    name="surface"
+                    type="number"
+                    value={formData.surface}
+                    onChange={handleChange}
+                    placeholder="1500"
+                  />
+                  <Input
+                    label="Durée BP (ans)"
+                    name="bpDuration"
+                    type="number"
+                    value={formData.bpDuration}
+                    onChange={handleChange}
+                    placeholder="5"
+                  />
+                </div>
+              </div>
             </div>
-          </Card>
+          </GlassCard>
 
           {/* Localisation */}
-          <Card title="Localisation" className="mb-6">
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm">2</span>
+              Localisation
+            </h2>
             <div className="space-y-4">
               <Input
                 label="Adresse"
@@ -250,10 +264,14 @@ export default function NewProjectPage() {
                 />
               </div>
             </div>
-          </Card>
+          </GlassCard>
 
           {/* Acquisition */}
-          <Card title="Acquisition" className="mb-6">
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-violet-500/20 text-violet-400 flex items-center justify-center text-sm">3</span>
+              Acquisition
+            </h2>
             <div className="space-y-4">
               <Input
                 label="Prix d'acquisition (€)"
@@ -275,7 +293,7 @@ export default function NewProjectPage() {
                 />
 
                 <Input
-                  label="Frais de due diligence (€)"
+                  label="Due diligence (€)"
                   name="dueDiligenceCost"
                   type="number"
                   value={formData.dueDiligenceCost}
@@ -294,38 +312,40 @@ export default function NewProjectPage() {
                 placeholder="4.5"
               />
             </div>
-          </Card>
+          </GlassCard>
 
           {/* État locatif */}
-          <Card title="État locatif" className="mb-6">
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-sm">4</span>
+              État locatif
+            </h2>
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="WALB (années)"
+                  label="WALB (ans)"
                   name="walb"
                   type="number"
                   step="0.1"
                   value={formData.walb}
                   onChange={handleChange}
                   placeholder="3.2"
-                  helperText="Weighted Average Lease Break"
                 />
 
                 <Input
-                  label="WALT (années)"
+                  label="WALT (ans)"
                   name="walt"
                   type="number"
                   step="0.1"
                   value={formData.walt}
                   onChange={handleChange}
                   placeholder="5.8"
-                  helperText="Weighted Average Lease Term"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <Input
-                  label="Loyer en place (€/an)"
+                  label="Loyer actuel (€/an)"
                   name="currentRent"
                   type="number"
                   value={formData.currentRent}
@@ -334,7 +354,7 @@ export default function NewProjectPage() {
                 />
 
                 <Input
-                  label="VLM - Valeur locative de marché (€/an)"
+                  label="VLM (€/an)"
                   name="marketRent"
                   type="number"
                   value={formData.marketRent}
@@ -353,93 +373,90 @@ export default function NewProjectPage() {
                 placeholder="95"
               />
             </div>
-          </Card>
+          </GlassCard>
 
           {/* Données financières */}
-          <Card title="Données financières" className="mb-6">
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-pink-500/20 text-pink-400 flex items-center justify-center text-sm">5</span>
+              Données financières
+            </h2>
             <div className="space-y-4">
               <Input
-                label="Prix d'achat"
-                name="purchasePrice"
-                type="number"
-                value={formData.purchasePrice}
-                onChange={handleChange}
-                placeholder="450000"
-                helperText="Montant en euros"
-              />
-
-              <Input
-                label="Budget travaux"
+                label="Budget travaux (€)"
                 name="renovationBudget"
                 type="number"
                 value={formData.renovationBudget}
                 onChange={handleChange}
                 placeholder="50000"
-                helperText="Montant en euros"
               />
 
               <Input
-                label="Valeur estimée"
+                label="Valeur estimée (€)"
                 name="estimatedValue"
                 type="number"
                 value={formData.estimatedValue}
                 onChange={handleChange}
                 placeholder="550000"
-                helperText="Valeur après travaux en euros"
+                helperText="Valeur après travaux"
               />
             </div>
-          </Card>
+          </GlassCard>
 
           {/* CAPEX & Travaux */}
-          <Card title="CAPEX & Travaux" className="mb-6">
-            <div className="space-y-4">
-              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                <p className="text-sm font-medium text-gray-700">Détail des travaux</p>
-                
-                <Input
-                  label="Gros œuvre (€)"
-                  name="capexGrosOeuvre"
-                  type="number"
-                  value={formData.capexGrosOeuvre}
-                  onChange={handleChange}
-                  placeholder="50000"
-                />
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-orange-500/20 text-orange-400 flex items-center justify-center text-sm">6</span>
+              Détail CAPEX
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Input
+                label="Gros œuvre (€)"
+                name="capexGrosOeuvre"
+                type="number"
+                value={formData.capexGrosOeuvre}
+                onChange={handleChange}
+                placeholder="50000"
+              />
 
-                <Input
-                  label="Second œuvre (€)"
-                  name="capexSecondOeuvre"
-                  type="number"
-                  value={formData.capexSecondOeuvre}
-                  onChange={handleChange}
-                  placeholder="80000"
-                />
+              <Input
+                label="Second œuvre (€)"
+                name="capexSecondOeuvre"
+                type="number"
+                value={formData.capexSecondOeuvre}
+                onChange={handleChange}
+                placeholder="80000"
+              />
 
-                <Input
-                  label="Aménagements (€)"
-                  name="capexAmenagements"
-                  type="number"
-                  value={formData.capexAmenagements}
-                  onChange={handleChange}
-                  placeholder="40000"
-                />
+              <Input
+                label="Aménagements (€)"
+                name="capexAmenagements"
+                type="number"
+                value={formData.capexAmenagements}
+                onChange={handleChange}
+                placeholder="40000"
+              />
 
-                <Input
-                  label="Autres travaux (€)"
-                  name="capexAutres"
-                  type="number"
-                  value={formData.capexAutres}
-                  onChange={handleChange}
-                  placeholder="30000"
-                />
-              </div>
+              <Input
+                label="Autres travaux (€)"
+                name="capexAutres"
+                type="number"
+                value={formData.capexAutres}
+                onChange={handleChange}
+                placeholder="30000"
+              />
             </div>
-          </Card>
+          </GlassCard>
 
           {/* Financement */}
-          <Card title="Financement" className="mb-6">
+          <GlassCard className="p-6">
+            <h2 className="text-xl font-semibold text-white mb-6 flex items-center gap-2">
+              <span className="w-8 h-8 rounded-lg bg-indigo-500/20 text-indigo-400 flex items-center justify-center text-sm">7</span>
+              Financement
+            </h2>
             <div className="space-y-4">
               <Input
-                label="Montant du financement (€)"
+                label="Montant financement (€)"
                 name="financingAmount"
                 type="number"
                 value={formData.financingAmount}
@@ -456,11 +473,10 @@ export default function NewProjectPage() {
                   value={formData.ltv}
                   onChange={handleChange}
                   placeholder="65"
-                  helperText="Loan to Value"
                 />
 
                 <Input
-                  label="Taux d'intérêt (%)"
+                  label="Taux (%)"
                   name="interestRate"
                   type="number"
                   step="0.01"
@@ -470,7 +486,7 @@ export default function NewProjectPage() {
                 />
 
                 <Input
-                  label="Durée du prêt (années)"
+                  label="Durée (ans)"
                   name="loanDuration"
                   type="number"
                   value={formData.loanDuration}
@@ -479,15 +495,16 @@ export default function NewProjectPage() {
                 />
               </div>
             </div>
-          </Card>
+          </GlassCard>
 
           {/* Actions */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 pt-4">
             <Button
               type="submit"
               size="lg"
+              variant="primary"
               isLoading={isSubmitting}
-              className="flex-1"
+              className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
             >
               Créer le projet
             </Button>
@@ -497,6 +514,7 @@ export default function NewProjectPage() {
               size="lg"
               onClick={() => router.back()}
               disabled={isSubmitting}
+              className="px-8 border-white/10 text-slate-300 hover:bg-white/5 hover:text-white"
             >
               Annuler
             </Button>

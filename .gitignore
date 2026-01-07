@@ -52,7 +52,7 @@ target/
 
 # 📦 Uploads
 uploads/
-*.pdf
+
 *.docx
 *.xlsx
 

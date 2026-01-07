@@ -78,6 +78,7 @@ class NotaryFeeService:
         
         # Initialisation
         result = {
+            "success": True,
             "purchase_price": purchase_price,
             "buyer_profile": buyer_profile,
             "building_age_years": building_age_years,

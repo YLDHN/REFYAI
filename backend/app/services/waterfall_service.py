@@ -24,8 +24,9 @@ class WaterfallService:
     
     def calculate_waterfall_simple(
         self,
-        total_profit: float,
-        equity_invested: float,
+        lp_contrib: float,
+        gp_investment: float = 0,
+        profit: float = 0,
         hurdle_rate: float = 0.10,
         lp_share_below_hurdle: float = 1.0,
         lp_share_above_hurdle: float = 0.80,
@@ -35,8 +36,9 @@ class WaterfallService:
         Calcule une distribution waterfall simplifiée (2 paliers)
         
         Args:
-            total_profit: Profit total à distribuer
-            equity_invested: Capital investi (pour calcul du TRI)
+            lp_contrib: Capital investi par le LP
+            gp_investment: Capital investi par le GP (default: 0)
+            profit: Profit total à distribuer
             hurdle_rate: Taux de rendement seuil (ex: 0.10 = 10%)
             lp_share_below_hurdle: Part LP en dessous du hurdle (défaut: 100%)
             lp_share_above_hurdle: Part LP au-dessus du hurdle (défaut: 80%)
@@ -46,18 +48,21 @@ class WaterfallService:
             Distribution détaillée LP/GP avec calculs
         """
         
+        total_profit = profit
+        equity_invested = lp_contrib + gp_investment
+        
         # Validation
         if total_profit < 0:
-            raise ValueError("Le profit total ne peut pas être négatif")
+            return {"success": False, "error": "Le profit total ne peut pas être négatif"}
         
         if equity_invested <= 0:
-            raise ValueError("Le capital investi doit être positif")
+            return {"success": False, "error": "Le capital investi doit être positif"}
         
         if lp_share_below_hurdle + (1 - lp_share_below_hurdle) != 1.0:
             raise ValueError("Les parts doivent totaliser 100%")
         
         if lp_share_above_hurdle + gp_share_above_hurdle != 1.0:
-            raise ValueError("Les parts au-dessus du hurdle doivent totaliser 100%")
+            return {"success": False, "error": "Les parts au-dessus du hurdle doivent totaliser 100%"}
         
         # Calcul du TRI réalisé (approximation simple)
         # TRI = (Total Distribué / Capital) - 1
@@ -69,6 +74,7 @@ class WaterfallService:
         hurdle_profit = equity_invested * hurdle_rate
         
         result = {
+            "success": True,
             "equity_invested": equity_invested,
             "total_profit": total_profit,
             "total_distributed": total_distributed,
@@ -86,6 +92,8 @@ class WaterfallService:
             lp_distribution = equity_invested + (total_profit * lp_share_below_hurdle)
             gp_distribution = total_profit * (1 - lp_share_below_hurdle)
             
+            result["lp_share"] = total_profit * lp_share_below_hurdle
+            result["gp_share"] = gp_distribution
             result["distribution"] = {
                 "scenario": "BELOW_HURDLE",
                 "description": f"Profit inférieur au Hurdle de {hurdle_rate*100:.1f}%",
@@ -129,8 +137,13 @@ class WaterfallService:
             gp_tier2 = above_hurdle_profit * gp_share_above_hurdle
             
             # Totaux
+            lp_total_profit = (below_hurdle_profit * lp_share_below_hurdle) + lp_tier2
+            gp_total_profit = gp_tier1 + gp_tier2
             lp_total = lp_tier1 + lp_tier2
-            gp_total = gp_tier1 + gp_tier2
+            gp_total = gp_total_profit
+            
+            result["lp_share"] = lp_total_profit
+            result["gp_share"] = gp_total_profit
             
             result["distribution"] = {
                 "scenario": "ABOVE_HURDLE",
@@ -139,7 +152,7 @@ class WaterfallService:
                     "capital_return": equity_invested,
                     "tier1_profit": below_hurdle_profit * lp_share_below_hurdle,
                     "tier2_profit": lp_tier2,
-                    "total_profit": (below_hurdle_profit * lp_share_below_hurdle) + lp_tier2,
+                    "total_profit": lp_total_profit,
                     "total": lp_total,
                     "irr": (lp_total / equity_invested) - 1,
                     "irr_pct": f"{((lp_total / equity_invested) - 1) * 100:.2f}%"
@@ -324,8 +337,9 @@ class WaterfallService:
         
         for profit in profit_range:
             waterfall = self.calculate_waterfall_simple(
-                total_profit=profit,
-                equity_invested=equity_invested,
+                lp_contrib=equity_invested,
+                gp_investment=0,
+                profit=profit,
                 hurdle_rate=hurdle_rate,
                 gp_share_above_hurdle=promote_share
             )

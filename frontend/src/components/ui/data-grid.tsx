@@ -8,15 +8,25 @@ import { Badge } from '@/components/ui/Badge';
 export interface Project {
   id: string;
   name: string;
-  address: string;
-  city: string;
-  typologie: string;
-  surface_totale: number;
-  prix_acquisition: number;
-  tri_avant_is?: number;
-  score_bloquant?: number;
-  score_technique?: number;
-  status: 'En cours' | 'Terminé' | 'Bloqué';
+  address?: string;
+  city?: string;
+  asset_type?: string;
+  surface?: number;
+  purchase_price?: number;
+  acquisition_price?: number;
+  renovation_budget?: number;
+  estimated_value?: number;
+  strategy?: string;
+  walb?: number;
+  walt?: number;
+  current_rent?: number;
+  market_rent?: number;
+  occupancy_rate?: number;
+  ltv?: number;
+  interest_rate?: number;
+  technical_score?: number;
+  risk_score?: number;
+  status: string;
   created_at: string;
 }
 
@@ -155,53 +165,57 @@ export const projectColumns: Column<Project>[] = [
     ),
   },
   {
-    key: 'address',
-    header: 'Adresse',
-    sortable: true,
-  },
-  {
     key: 'city',
     header: 'Ville',
     sortable: true,
   },
   {
-    key: 'typologie',
+    key: 'asset_type',
     header: 'Type',
     sortable: true,
+    render: (value) => {
+      const types: Record<string, string> = {
+        'residential': 'Résidentiel',
+        'office': 'Bureau',
+        'retail': 'Commerce',
+        'logistics': 'Logistique',
+        'mixed': 'Mixte'
+      };
+      return types[value as string] || value || '-';
+    },
   },
   {
-    key: 'surface_totale',
+    key: 'surface',
     header: 'Surface (m²)',
     sortable: true,
     render: (value) => value ? `${value.toLocaleString('fr-FR')} m²` : '-',
   },
   {
-    key: 'prix_acquisition',
+    key: 'purchase_price',
     header: 'Prix',
     sortable: true,
-    render: (value) => value ? `${value.toLocaleString('fr-FR')} €` : '-',
+    render: (value) => value ? `${(value / 1000000).toFixed(1)}M€` : '-',
   },
   {
-    key: 'tri_avant_is',
-    header: 'TRI',
+    key: 'ltv',
+    header: 'LTV',
     sortable: true,
-    render: (value) => value ? `${(value * 100).toFixed(1)}%` : '-',
+    render: (value) => value ? `${value.toFixed(0)}%` : '-',
   },
   {
-    key: 'score_technique',
+    key: 'technical_score',
     header: 'Score Technique',
     sortable: true,
     render: (value) => {
       if (value == null) return '-';
-      const score = value * 100;
       return (
         <span className={cn(
           'font-medium',
-          score >= 80 ? 'text-green-400' :
-          score >= 60 ? 'text-yellow-400' :
+          value >= 80 ? 'text-green-400' :
+          value >= 60 ? 'text-yellow-400' :
           'text-red-400'
         )}>
-          {score.toFixed(0)}/100
+          {value.toFixed(0)}/100
         </span>
       );
     },
@@ -211,11 +225,14 @@ export const projectColumns: Column<Project>[] = [
     header: 'Statut',
     sortable: true,
     render: (value) => {
-      const variant = 
-        value === 'Terminé' ? 'success' :
-        value === 'Bloqué' ? 'error' :
-        'warning';
-      return <Badge variant={variant}>{value}</Badge>;
+      const statusMap: Record<string, { label: string; variant: 'success' | 'warning' | 'error' | 'default' }> = {
+        'completed': { label: 'Terminé', variant: 'success' },
+        'in_progress': { label: 'En cours', variant: 'warning' },
+        'draft': { label: 'Brouillon', variant: 'default' },
+        'archived': { label: 'Archivé', variant: 'error' },
+      };
+      const status = statusMap[value as string] || { label: value, variant: 'default' as const };
+      return <Badge variant={status.variant}>{status.label}</Badge>;
     },
   },
 ];
