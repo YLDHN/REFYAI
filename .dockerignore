@@ -1,0 +1,27 @@
+# Ignorer les fichiers et dossiers non nécessaires dans l'image Docker
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+.env
+.env.local
+*.log
+.DS_Store
+.vscode/
+.idea/
+*.db
+*.sqlite3
+node_modules/
+frontend/
+.git/
+.github/
+*.md
+!README.md
