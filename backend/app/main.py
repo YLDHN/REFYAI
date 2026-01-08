@@ -51,12 +51,32 @@ async def timeout_middleware(request: Request, call_next: Callable):
 # Monitoring middleware
 app.add_middleware(MonitoringMiddleware)
 
-# Configuration CORS améliorée
+# Configuration CORS pour production (Vercel frontend + Render backend)
+# Liste explicite des origines autorisées
+cors_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001", 
+    "https://refyai.vercel.app",
+    "https://refyai.com",
+    "https://www.refyai.com",
+]
+
+# Ajouter les origines de settings si différentes
+for origin in settings.ALLOWED_ORIGINS:
+    if origin not in cors_origins and origin != "*":
+        cors_origins.append(origin)
+
+# Mode permissif en dev uniquement
+if settings.DEBUG:
+    cors_origins = ["*"]
+
+print(f"🔒 CORS configured with origins: {cors_origins}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_origins=cors_origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"],
     allow_headers=["*"],
     expose_headers=["*"],
     max_age=3600,  # Cache preflight 1h
